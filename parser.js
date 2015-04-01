@@ -1,13 +1,12 @@
 var Parser = function (text) {
-  this.opcodes = ['for', 'rof', 'dat', 'mov', 'add', 'sub', 'mul', 'div', 'mod', 'jmp', 'jmz', 'jmn', 'djn', 'spl', 'cmp', 'seq', 'sne', 'slt', 'ldp', 'stp', 'nop'];
+  this.opcodes = ['dat', 'mov', 'add', 'sub', 'mul', 'div', 'mod', 'jmp', 'jmz', 'jmn', 'djn', 'spl', 'cmp', 'seq', 'sne', 'slt', 'ldp', 'stp', 'nop'];
   this.modifiers = ['a', 'b', 'ab', 'ba', 'f', 'x', 'i'];
   this.modes = ['#', '$', '*', '@', '{', '<', '}', '>'];
+
   this.coreSize = 8000;
 
   this.labels = [];
   this.variables = [];
-
-  this.original = text;
 
   this.program = [];
   this.lines = 0;
@@ -656,7 +655,6 @@ var Parser = function (text) {
     return lowerCase;
   }
 
-
   /**
    * Check opcodes and throw an error if an invalid line was found
    */
@@ -689,9 +687,7 @@ var Parser = function (text) {
 };
 
 Parser.prototype.getWarrior = function () {
-  var warrior = new Warrior(this.program, this.start);
-  warrior.setAuthor(this.author);
-  warrior.setName(this.name);
+  var warrior = new Warrior(this.program, this.start, this.author, this.name);
 
   return warrior;
 }

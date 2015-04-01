@@ -1,15 +1,7 @@
-var Warrior = function(code, start) {
+var Warrior = function(code, start, author, name) {
   this.code = code;
   this.start = start;
-  this.author = 'unknown';
-  this.name = 'unknown';
-};
-
-Warrior.prototype.setAuthor = function(author) {
   this.author = author;
-};
-
-Warrior.prototype.setName = function(name) {
   this.name = name;
 };
 
