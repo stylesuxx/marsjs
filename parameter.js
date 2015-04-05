@@ -3,8 +3,12 @@ var Parameter = function (mode, value) {
   this.value = value;
 };
 
+Parameter.prototype.setValue = function(value) {
+  this.value = value;
+};
+
 Parameter.prototype.getValue = function() {
-  return this.value;
+  return parseInt(this.value);
 };
 
 Parameter.prototype.getMode = function() {
