@@ -150,6 +150,7 @@ var Field = function(coreSize) {
 
     switch(op) {
       case "dat": {
+        // TODO: check if address modes should be processed
         console.log("DAT executed");
         throw "kill process";
       }; break;
@@ -194,8 +195,8 @@ var Field = function(coreSize) {
         this.jmp(pc, modifier, a, b);
       }; break;
 
-      case "jmzx": {
-
+      case "jmz": {
+        this.jmz(pc, modifier, a, b);
       }; break;
 
       case "jmnx": {
@@ -1127,29 +1128,85 @@ var Field = function(coreSize) {
     var b_adr = this.getAddress(pc, b);
 
     switch(modifier) {
-      /**
-       * Set the current warriors pc to (pc + A-number of A address)
-       */
-      case "f":
-      case "i":
       case "a":
       case "b":
       case "ab":
       case "ba":
-      case "x": {
-        var a_value = this.field[pc].getInstruction().getA().getValue();
-        if(a_value >= 0) {
-          a_value += pc;
-        }
-        else {
-          a_value = (a_value * -1) - pc;
-        }
-
-        this.warriors[this.currentWarrior].setPC(a_value);
+      case "x":
+      case "f":
+      case "i": {
+        this.warriors[this.currentWarrior].setPC(a_adr);
       }; break;
 
       default: {
         console.log("JMP - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      touched.push(pc);
+      touched.push(a_adr);
+      touched.push(b_adr);
+
+      this.updateCallback(touched);
+    }
+  };
+
+  this.jmz = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
+
+    switch(modifier) {
+      /**
+       * jump to A address if A-number of B address is 0
+       * else: increase the counter by one
+       */
+      case "a":
+      case "ba": {
+        var address = pc +1;
+        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        if(a_nr == 0) {
+          address = a_adr;
+        }
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * jump to A address if B-number of B address is 0
+       * else: increase the counter by one
+       */
+      case "b":
+      case "ab": {
+        var address = pc + 1;
+        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        if(b_nr == 0) {
+          address = a_adr;
+        }
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * jump to A address if A-number and B-number of B address are 0
+       * else: increase the counter by one
+       */
+      case "x":
+      case "f":
+      case "i": {
+        var address = pc + 1;
+        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        if(a_nr == 0 && b_nr == 0) {
+          address = a_adr;
+        }
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      default: {
+        console.log("JMZ - unknown modifier:", modifier);
       }
     }
 
@@ -1162,7 +1219,7 @@ var Field = function(coreSize) {
 
       this.updateCallback(touched);
     }
-  };
+  }
 
   this.initializField();
 };
