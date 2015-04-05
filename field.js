@@ -174,7 +174,6 @@ var Field = function(coreSize) {
         this.warriors[this.currentWarrior].increasePC();
       }; break;
 
-      // Division by zero kills the process
       case "div": {
         try {
           this.div(pc, modifier, a, b);
@@ -186,12 +185,13 @@ var Field = function(coreSize) {
         }
       }; break;
 
-      case "modx": {
-
+      case "mod": {
+        this.mod(pc, modifier, a, b);
+        this.warriors[this.currentWarrior].increasePC();
       }; break;
 
-      case "jmpx": {
-
+      case "jmp": {
+        this.jmp(pc, modifier, a, b);
       }; break;
 
       case "jmzx": {
@@ -1018,6 +1018,152 @@ var Field = function(coreSize) {
     }
   };
 
+  this.mod = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
+
+    switch(modifier) {
+      /**
+       * mod A-number of B address by A-number of A address
+       * mod B-number of B address by B-number of A address
+       */
+      case "f":
+      case "i": {
+        var a_value = this.field[b_adr].getInstruction().getA().getValue();
+        a_value %= this.field[a_adr].getInstruction().getA().getValue();
+        a_value = this.sanitizeAddress(a_value);
+
+        var b_value = this.field[b_adr].getInstruction().getB().getValue();
+        b_value %= this.field[a_adr].getInstruction().getB().getValue();
+        b_value = this.sanitizeAddress(b_value);
+
+        this.field[b_adr].getInstruction().getA().setValue(a_value);
+        this.field[b_adr].getInstruction().getB().setValue(b_value);
+      }; break;
+
+      /**
+       * mod A-number of B address by A-number of A address
+       */
+      case "a": {
+        var a_value = this.field[b_adr].getInstruction().getA().getValue();
+        a_value %= this.field[a_adr].getInstruction().getA().getValue();
+        a_value = this.sanitizeAddress(a_value);
+
+        this.field[b_adr].getInstruction().getA().setValue(a_value);
+      }; break;
+
+      /**
+       * mod B-number of B address by B-number of A address
+       */
+      case "b": {
+        var b_value = this.field[b_adr].getInstruction().getB().getValue();
+        b_value %= this.field[a_adr].getInstruction().getB().getValue();
+        b_value = this.sanitizeAddress(b_value);
+
+        this.field[b_adr].getInstruction().getB().setValue(b_value);
+      }; break;
+
+      /**
+       * mod B-number of B address by A-number of A address
+       */
+      case "ab": {
+        var a_value = this.field[b_adr].getInstruction().getB().getValue();
+        a_value %= this.field[a_adr].getInstruction().getA().getValue();
+        a_value = this.sanitizeAddress(a_value);
+
+        this.field[b_adr].getInstruction().getB().setValue(a_value);
+      }; break;
+
+      /**
+       * mod A-number of B address by B-number of A address
+       */
+      case "ba": {
+        var b_value = this.field[b_adr].getInstruction().getA().getValue();
+        b_value %= this.field[a_adr].getInstruction().getB().getValue();
+        b_value = this.sanitizeAddress(b_value);
+
+        this.field[b_adr].getInstruction().getA().setValue(b_value);
+      }; break;
+
+      /**
+       * mod B-number of B address by A-number of A address
+       * mod A-number of B address by B-number of A address
+       */
+      case "x": {
+        var a_value = this.field[b_adr].getInstruction().getB().getValue();
+        a_value %= this.field[a_adr].getInstruction().getA().getValue();
+        a_value = this.sanitizeAddress(a_value);
+
+        var b_value = this.field[b_adr].getInstruction().getA().getValue();
+        b_value %= this.field[a_adr].getInstruction().getB().getValue();
+        b_value = this.sanitizeAddress(b_value);
+
+        this.field[b_adr].getInstruction().getB().setValue(a_value);
+        this.field[b_adr].getInstruction().getA().setValue(b_value);
+      }; break;
+
+      default: {
+        console.log("MOD - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+      this.field[a_adr].setLastAction("read");
+      this.field[b_adr].setLastAction("write");
+
+      touched.push(pc);
+      touched.push(a_adr);
+      touched.push(b_adr);
+
+      this.updateCallback(touched);
+    }
+  };
+
+  this.jmp = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
+
+    switch(modifier) {
+      /**
+       * Set the current warriors pc to (pc + A-number of A address)
+       */
+      case "f":
+      case "i":
+      case "a":
+      case "b":
+      case "ab":
+      case "ba":
+      case "x": {
+        var a_value = this.field[pc].getInstruction().getA().getValue();
+        if(a_value >= 0) {
+          a_value += pc;
+        }
+        else {
+          a_value = (a_value * -1) - pc;
+        }
+
+        this.warriors[this.currentWarrior].setPC(a_value);
+      }; break;
+
+      default: {
+        console.log("JMP - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      this.field[a_adr].setLastAction("read");
+
+      touched.push(pc);
+      touched.push(a_adr);
+      touched.push(b_adr);
+
+      this.updateCallback(touched);
+    }
+  };
+
   this.initializField();
 };
 
@@ -1025,6 +1171,17 @@ Field.prototype.getField = function() {
   return this.field;
 };
 
+/**
+ * Adds a warrior to the field.
+ *
+ * The first warrior is load at absolute 0, every other warrior is loaded
+ * at a random position with a minimum offset from every other warrior.
+ *
+ * If a warrior could be positioned on the field, the function returns true.
+ *
+ * If a warrior could not be placed on the field anymore, the function returns
+ * false.
+ */
 Field.prototype.addWarrior = function(warrior, color) {
   var warrior = warrior;
   if(color) {
@@ -1045,13 +1202,21 @@ Field.prototype.addWarrior = function(warrior, color) {
     cell.setInstruction(instruction);
     cell.setLastUser(warrior);
   }
+
+  return true;
 };
 
+/**
+ * Triggers the start of the simulation and executes the first move.
+ */
 Field.prototype.start = function(updateCallback) {
   this.updateCallback = updateCallback;
   this.move();
 };
 
+/**
+ * Execute the operation of the currently active warrior
+ */
 Field.prototype.move = function() {
   var warrior = this.warriors[this.currentWarrior];
   var pc = this.sanitizeAddress(warrior.getPC());
