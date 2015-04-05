@@ -1,0 +1,24 @@
+.cell {
+  float: left;
+  background-color: grey;
+  width: 7px;
+  height: 7px;
+  margin-left: 3px;
+  margin-bottom: 3px;
+}
+
+.cell[action=exec] {
+  opacity: 1;
+}
+
+.cell[action=init] {
+  opacity: 0.8;
+}
+
+.cell[action=read] {
+  opacity: 0.2;
+}
+
+.cell[action=write] {
+  opacity: 0.6;
+}
