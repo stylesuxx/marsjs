@@ -3,6 +3,8 @@ var Warrior = function(code, start, author, name) {
   this.start = start;
   this.author = author;
   this.name = name;
+  this.pc = 0;
+  this.color = "red";
 };
 
 Warrior.prototype.getAuthor = function() {
@@ -23,4 +25,24 @@ Warrior.prototype.getStart = function() {
 
 Warrior.prototype.getCode = function() {
   return this.code;
+};
+
+Warrior.prototype.getPC = function() {
+  return this.pc;
+};
+
+Warrior.prototype.setPC = function(pc) {
+  this.pc = pc;
+};
+
+Warrior.prototype.increasePC = function() {
+  this.pc += 1;
+}
+
+Warrior.prototype.getColor = function() {
+  return this.color;
+};
+
+Warrior.prototype.setColor = function(color) {
+  this.color = color;
 };
