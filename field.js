@@ -1180,7 +1180,7 @@ var Field = function(coreSize) {
       case "a":
       case "ba": {
         var address = pc +1;
-        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        var a_nr = this.getANumber(b_adr);
         if(a_nr == 0) {
           address = a_adr;
         }
@@ -1196,7 +1196,7 @@ var Field = function(coreSize) {
       case "b":
       case "ab": {
         var address = pc + 1;
-        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        var b_nr = this.getBNumber(b_adr);
         if(b_nr == 0) {
           address = a_adr;
         }
@@ -1213,8 +1213,8 @@ var Field = function(coreSize) {
       case "f":
       case "i": {
         var address = pc + 1;
-        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
-        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        var a_nr = this.getANumber(b_adr);
+        var b_nr = this.getBNumber(b_adr);
         if(a_nr == 0 && b_nr == 0) {
           address = a_adr;
         }
