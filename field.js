@@ -105,47 +105,39 @@ var Field = function(coreSize, maxCycles) {
   };
 
   this.decrementAField = function(pc) {
-    var a = this.field[pc].getInstruction().getA();
-    var value = a.getValue();
-    value -= 1;
-    value = this.sanitizeAddress(value);
+    var a_nr = this.getANumber(pc);
+    a_nr = this.sanitizeAddress(a_nr - 1);
 
-    if(this.updateCallback) this.touched.push(value);
+    this.setANumber(pc, a_nr);
 
-    a.setValue(value);
+    if(this.updateCallback) this.touched.push(pc);
   };
 
   this.incrementAField = function(pc) {
-    var a = this.field[pc].getInstruction().getA();
-    var value = a.getValue();
-    value += 1;
-    value = this.sanitizeAddress(value);
+    var a_nr = this.getANumber(pc);
+    a_nr = this.sanitizeAddress(a_nr + 1);
 
-    if(this.updateCallback) this.touched.push(value);
+    this.setANumber(pc, a_nr);
 
-    a.setValue(value);
+    if(this.updateCallback) this.touched.push(pc);
   };
 
   this.decrementBField = function(pc) {
-    var b = this.field[pc].getInstruction().getB();
-    var value = b.getValue();
-    value -= 1;
-    value = this.sanitizeAddress(value);
+    var b_nr = this.getBNumber(pc);
+    b_nr = this.sanitizeAddress(b_nr - 1);
 
-    if(this.updateCallback) this.touched.push(value);
+    this.setBNumber(pc, b_nr);
 
-    b.setValue(value);
+    if(this.updateCallback) this.touched.push(pc);
   };
 
   this.incrementBField = function(pc) {
-    var b = this.field[pc].getInstruction().getB();
-    var value = b.getValue();
-    value += 1;
-    value = this.sanitizeAddress(value);
+    var b_nr = this.getBNumber(pc);
+    b_nr = this.sanitizeAddress(b_nr + 1);
 
-    if(this.updateCallback) this.touched.push(value);
+    this.setBNumber(pc, b_nr);
 
-    b.setValue(value);
+    if(this.updateCallback) this.touched.push(pc);
   };
 
   this.executeInstruction = function(pc) {
