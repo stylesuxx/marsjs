@@ -141,7 +141,6 @@ var Field = function(coreSize) {
   };
 
   this.executeInstruction = function(pc) {
-    var touched = null;
     var instruction = this.field[pc].getInstruction();
     var op = instruction.getOpcode();
     var modifier = instruction.getModifier();
@@ -151,7 +150,7 @@ var Field = function(coreSize) {
     switch(op) {
       case "dat": {
         // TODO: check if address modes should be processed
-        console.log("DAT executed");
+        console.log("DAT executed at", pc);
         throw "kill process";
       }; break;
 
@@ -199,12 +198,12 @@ var Field = function(coreSize) {
         this.jmz(pc, modifier, a, b);
       }; break;
 
-      case "jmnx": {
-
+      case "jmn": {
+        this.jmz(pc, modifier, a, b);
       }; break;
 
-      case "djnx": {
-
+      case "djn": {
+        this.djn(pc, modifier, a, b);
       }; break;
 
       case "cmpx": {
@@ -1169,6 +1168,7 @@ var Field = function(coreSize) {
         if(a_nr == 0) {
           address = a_adr;
         }
+        address = this.sanitizeAddress(address);
 
         this.warriors[this.currentWarrior].setPC(address);
       }; break;
@@ -1184,6 +1184,7 @@ var Field = function(coreSize) {
         if(b_nr == 0) {
           address = a_adr;
         }
+        address = this.sanitizeAddress(address);
 
         this.warriors[this.currentWarrior].setPC(address);
       }; break;
@@ -1201,6 +1202,7 @@ var Field = function(coreSize) {
         if(a_nr == 0 && b_nr == 0) {
           address = a_adr;
         }
+        address = this.sanitizeAddress(address);
 
         this.warriors[this.currentWarrior].setPC(address);
       }; break;
@@ -1219,7 +1221,184 @@ var Field = function(coreSize) {
 
       this.updateCallback(touched);
     }
-  }
+  };
+
+  this.jmn = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
+
+    switch(modifier) {
+      /**
+       * decrement A-number of B Address
+       * decrement A-number
+       * else: increase the counter by one
+       */
+      case "a":
+      case "ba": {
+        var address = pc +1;
+        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        if(a_nr != 0) {
+          address = a_adr;
+        }
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * jump to A address if B-number of B address is not 0
+       * else: increase the counter by one
+       */
+      case "b":
+      case "ab": {
+        var address = pc + 1;
+        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        if(b_nr != 0) {
+          address = a_adr;
+        }
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * jump to A address if either A-number or B-number of B address is not 0
+       * else: increase the counter by one
+       */
+      case "f":
+      case "x":
+      case "i": {
+        var address = pc + 1;
+        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        if(a_nr != 0 && b_nr != 0) {
+          address = a_adr;
+        }
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      default: {
+        console.log("JMN - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      this.field[a_adr].setLastAction("read");
+
+      touched.push(pc);
+      touched.push(a_adr);
+      touched.push(b_adr);
+
+      this.updateCallback(touched);
+    }
+  };
+
+  this.djn = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
+
+    switch(modifier) {
+      /**
+       * decrement A-number at B address
+       * if A-number at B address not 0: jump to A address
+       * else: increase the counter by one
+       */
+      case "a":
+      case "ba": {
+        var address = pc + 1;
+        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        a_nr -= 1;
+        a_nr = this.sanitizeAddress(a_nr);
+        this.field[b_adr].getInstruction().getA().setValue(a_nr);
+
+        if(a_nr != 0) {
+          address = a_adr;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * decrement B-number at B address
+       * if B-number at B address not 0: jump to A address
+       * else: increase the counter by one
+       */
+      case "b":
+      case "ab": {
+        var address = pc + 1;
+
+        // decrement B-number at B address
+        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        b_nr -= 1;
+        b_nr = this.sanitizeAddress(b_nr);
+        this.field[b_adr].getInstruction().getB().setValue(b_nr);
+
+        if(b_nr != 0) {
+          address = a_adr;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * decrement A-number at B address
+       * decrement B-number at B address
+       * if A-number or B-number at B address not 0: jump to A address
+       * else: increase the counter by one
+       */
+      case "f":
+      case "x":
+      case "i": {
+        var address = pc + 1;
+
+        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
+        a_nr -= 1;
+        a_nr = this.sanitizeAddress(a_nr);
+        this.field[b_adr].getInstruction().getA().setValue(a_nr);
+
+        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
+        b_nr -= 1;
+        b_nr = this.sanitizeAddress(a_nr);
+        this.field[b_adr].getInstruction().getB().setValue(b_nr);
+
+        if(a_nr != 0 || b_nr != 0) {
+          address = a_adr;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      default: {
+        console.log("DJN - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      this.field[a_adr].setLastAction("read");
+
+      touched.push(pc);
+      touched.push(a_adr);
+      touched.push(b_adr);
+
+      this.updateCallback(touched);
+    }
+  };
+
+  this.cmp = function(pc, modifier, a, b) {
+
+  };
+
+  this.slt = function(pc, modifier, a, b) {
+
+  };
+
+  this.spl = function(pc, modifier, a, b) {
+
+  };
 
   this.initializField();
 };
@@ -1278,6 +1457,7 @@ Field.prototype.move = function() {
   var warrior = this.warriors[this.currentWarrior];
   var pc = this.sanitizeAddress(warrior.getPC());
 
+  console.log('Execute instructin at', pc);
   this.executeInstruction(pc);
 
   this.currentWarrior = (this.currentWarrior + 1) % this.warriors.length;
