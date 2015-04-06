@@ -456,60 +456,60 @@ var Field = function(coreSize, maxCycles) {
        */
       case "f":
       case "i": {
-        var a_value = this.field[b_adr].getInstruction().getA().getValue();
-        a_value -= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getANumber(b_adr);
+        a_nr -= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        var b_value = this.field[b_adr].getInstruction().getB().getValue();
-        b_value -= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr -= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getA().setValue(a_value);
-        this.field[b_adr].getInstruction().getB().setValue(b_value);
+        this.setANumber(b_adr, a_nr);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
        * subtract A-number of A address from A-number of B address
        */
       case "a": {
-        var a_value = this.field[b_adr].getInstruction().getA().getValue();
-        a_value -= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getANumber(b_adr);
+        a_nr -= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        this.field[b_adr].getInstruction().getA().setValue(a_value);
+        this.setANumber(b_adr, a_nr);
       }; break;
 
       /**
        * subtract B-number of A address from B-number of B address
        */
       case "b": {
-        var b_value = this.field[b_adr].getInstruction().getB().getValue();
-        b_value -= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr -= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getB().setValue(b_value);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
        * subtract A-number of A address from B-number of B address
        */
       case "ab": {
-        var a_value = this.field[b_adr].getInstruction().getB().getValue();
-        a_value -= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getBNumber(b_adr);
+        a_nr -= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        this.field[b_adr].getInstruction().getB().setValue(a_value);
+        this.setBNumber(b_adr, a_nr);
       }; break;
 
       /**
        * subtract B-number of A address from A-number of B address
        */
       case "ba": {
-        var b_value = this.field[b_adr].getInstruction().getA().getValue();
-        b_value -= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getANumber(b_adr);
+        b_nr -= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getA().setValue(b_value);
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       /**
@@ -517,16 +517,16 @@ var Field = function(coreSize, maxCycles) {
        * subtract B-number of A address from A-number of B address
        */
       case "x": {
-        var a_value = this.field[b_adr].getInstruction().getB().getValue();
-        a_value -= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getBNumber(b_adr);
+        a_nr -= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        var b_value = this.field[b_adr].getInstruction().getA().getValue();
-        b_value -= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getANumber(b_adr);
+        b_nr -= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getB().setValue(a_value);
-        this.field[b_adr].getInstruction().getA().setValue(b_value);
+        this.setBNumber(b_adr, a_nr);
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       // Unknown modifier
@@ -558,60 +558,60 @@ var Field = function(coreSize, maxCycles) {
        */
       case "f":
       case "i": {
-        var a_value = this.field[b_adr].getInstruction().getA().getValue();
-        a_value *= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getANumber(b_adr);
+        a_nr *= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        var b_value = this.field[b_adr].getInstruction().getB().getValue();
-        b_value *= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr *= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getA().setValue(a_value);
-        this.field[b_adr].getInstruction().getB().setValue(b_value);
+        this.setANumber(b_adr, a_nr);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
        * multiply A-number of A address with A-number of B address
        */
       case "a": {
-        var a_value = this.field[b_adr].getInstruction().getA().getValue();
-        a_value *= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getANumber(b_adr);
+        a_nr *= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        this.field[b_adr].getInstruction().getA().setValue(a_value);
+        this.setANumber(b_adr, a_nr);
       }; break;
 
       /**
        * multiply B-number of A address with B-number of B address
        */
       case "b": {
-        var b_value = this.field[b_adr].getInstruction().getB().getValue();
-        b_value *= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr *= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getB().setValue(b_value);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
        * multiply A-number of A address with B-number of B address
        */
       case "ab": {
-        var a_value = this.field[b_adr].getInstruction().getB().getValue();
-        a_value *= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getBNumber(b_adr);
+        a_nr *= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        this.field[b_adr].getInstruction().getB().setValue(a_value);
+        this.setBNumber(b_adr, a_nr);
       }; break;
 
       /**
        * multiply B-number of A address with A-number of B address
        */
       case "ba": {
-        var b_value = this.field[b_adr].getInstruction().getA().getValue();
-        b_value *= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getANumber(b_adr);
+        b_nr *= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getA().setValue(b_value);
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       /**
@@ -619,16 +619,16 @@ var Field = function(coreSize, maxCycles) {
        * multiply B-number of A address with A-number of B address
        */
       case "x": {
-        var a_value = this.field[b_adr].getInstruction().getB().getValue();
-        a_value *= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getBNumber(b_adr);
+        a_nr *= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        var b_value = this.field[b_adr].getInstruction().getA().getValue();
-        b_value *= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getANumber(b_adr);
+        b_nr *= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        this.field[b_adr].getInstruction().getB().setValue(a_value);
-        this.field[b_adr].getInstruction().getA().setValue(b_value);
+        this.setBNumber(b_adr, a_nr);
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       // Unknown modifier
@@ -660,85 +660,85 @@ var Field = function(coreSize, maxCycles) {
        */
       case "f":
       case "i": {
-        var a_value = this.field[b_adr].getInstruction().getA().getValue();
-        a_value /= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getANumber(b_adr);
+        a_nr /= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        var b_value = this.field[b_adr].getInstruction().getB().getValue();
-        b_value /= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr /= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        if(isNaN(a_value) || isNaN(b_value)) {
+        if(isNaN(a_nr) || isNaN(b_nr)) {
           throw "Division by 0";
           return;
         }
 
-        this.field[b_adr].getInstruction().getA().setValue(a_value);
-        this.field[b_adr].getInstruction().getB().setValue(b_value);
+        this.setANumber(b_adr, a_nr);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
        * divide A-number of B address by A-number of A address
        */
       case "a": {
-        var a_value = this.field[b_adr].getInstruction().getA().getValue();
-        a_value /= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getANumber(b_adr);
+        a_nr /= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        if(isNaN(a_value)) {
+        if(isNaN(a_nr)) {
           throw "Division by 0";
           return;
         }
 
-        this.field[b_adr].getInstruction().getA().setValue(a_value);
+        this.setANumber(b_adr, a_nr);
       }; break;
 
       /**
        * divide B-number of B address by B-number of A address
        */
       case "b": {
-        var b_value = this.field[b_adr].getInstruction().getB().getValue();
-        b_value /= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr /= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        if(isNaN(b_value)) {
+        if(isNaN(b_nr)) {
           throw "Division by 0";
           return;
         }
 
-        this.field[b_adr].getInstruction().getB().setValue(b_value);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
        * divide B-number of B address by A-number of A address
        */
       case "ab": {
-        var a_value = this.field[b_adr].getInstruction().getB().getValue();
-        a_value /= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getBNumber(b_adr);
+        a_nr /= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        if(isNaN(a_value)) {
+        if(isNaN(a_nr)) {
           throw "Division by 0";
           return;
         }
 
-        this.field[b_adr].getInstruction().getB().setValue(a_value);
+        this.setBNumber(b_adr, a_nr);
       }; break;
 
       /**
        * divide A-number of B address by B-number of A address
        */
       case "ba": {
-        var b_value = this.field[b_adr].getInstruction().getA().getValue();
-        b_value /= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getANumber(b_adr);
+        b_nr /= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        if(isNaN(b_value)) {
+        if(isNaN(b_nr)) {
           throw "Division by 0";
           return;
         }
 
-        this.field[b_adr].getInstruction().getA().setValue(b_value);
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       /**
@@ -746,21 +746,21 @@ var Field = function(coreSize, maxCycles) {
        * divide A-number of B address by B-number of A address
        */
       case "x": {
-        var a_value = this.field[b_adr].getInstruction().getB().getValue();
-        a_value /= this.field[a_adr].getInstruction().getA().getValue();
-        a_value = this.sanitizeAddress(a_value);
+        var a_nr = this.getBNumber(b_adr);
+        a_nr /= this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr);
 
-        var b_value = this.field[b_adr].getInstruction().getA().getValue();
-        b_value /= this.field[a_adr].getInstruction().getB().getValue();
-        b_value = this.sanitizeAddress(b_value);
+        var b_nr = this.getANumber(b_adr);
+        b_nr /= this.getBNumber(a_adr);
+        b_nr = this.sanitizeAddress(b_nr);
 
-        if(isNaN(a_value) || isNaN(b_value)) {
+        if(isNaN(a_nr) || isNaN(b_nr)) {
           throw "Division by 0";
           return;
         }
 
-        this.field[b_adr].getInstruction().getB().setValue(a_value);
-        this.field[b_adr].getInstruction().getA().setValue(b_value);
+        this.setBNumber(b_adr, a_nr);
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       // Unknown modifier
