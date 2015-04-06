@@ -36,17 +36,17 @@ $('button.load-warrior').click(function(e) {
   var parser = new Parser(text);
   var warrior = parser.getWarrior();
 
-  var count = $(".warriors .warrior").length + 1;
+  var count = $('.warriors .warrior').length + 1;
 
-  $(".warrior-template")
+  $('.warrior-template')
     .clone()
-    .appendTo(".warriors")
-    .removeClass("warrior-template")
-    .removeClass("hidden")
-    .addClass("warrior")
-    .addClass("warrior-" + count);
+    .appendTo('.warriors')
+    .removeClass('warrior-template')
+    .removeClass('hidden')
+    .addClass('warrior')
+    .addClass('warrior-' + count);
 
-  $(".warrior-" + count + " .warrior-info").append().html('Program <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
+  $('.warrior-' + count + ' .warrior-info').append().html('Program <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
 
   for(var i = 0, code = warrior.getCode(); i < code.length; i++) {
     var current = code[i];
@@ -54,7 +54,7 @@ $('button.load-warrior').click(function(e) {
     if(i == warrior.getStart()) {
       start = 'START';
     }
-    $(".warrior-" + count + " table tbody").append('<tr>' +
+    $('.warrior-' + count + ' table tbody').append('<tr>' +
       '<td>' + start + '</td>' +
       '<td>' + current.getOpcode().toUpperCase() + '.' + current.getModifier().toUpperCase() + '</td>'+
       '<td>' + current.getA().getMode().toUpperCase() + '</td>' +
@@ -64,7 +64,7 @@ $('button.load-warrior').click(function(e) {
   }
 
   var drawField = function(cells) {
-    var container = "";
+    var container = '';
     for(var i = 0; i < cells.length; i++) {
       var cell = cells[i];
       var color = ''
@@ -77,11 +77,13 @@ $('button.load-warrior').click(function(e) {
       var item = '<div index="' + i + '" ' + color + ' class="cell" action="' + action + '" title="' + title + '"></div>';
       container += item;
     }
-    $('.row.field').html(container);
+    $('.field').html(container);
   };
 
   field.addWarrior(warrior);
 
   var cells = field.getField();
   drawField(cells);
+
+  $('.controls').removeClass('hidden');
 });
