@@ -228,9 +228,17 @@ var Field = function(coreSize) {
     return this.field[address].getInstruction().getA().getValue();
   };
 
+  this.setANumber = function(address, value) {
+    this.field[address].getInstruction().getA().setValue(value);
+  }
+
   this.getBNumber = function(address) {
     return this.field[address].getInstruction().getB().getValue();
   };
+
+  this.setBNumber = function(address, value) {
+    this.field[address].getInstruction().getB().setValue(value);
+  }
 
   /**
    * Opcode implementations
@@ -1315,10 +1323,9 @@ var Field = function(coreSize) {
       case "a":
       case "ba": {
         var address = pc + 1;
-        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
-        a_nr -= 1;
-        a_nr = this.sanitizeAddress(a_nr);
-        this.field[b_adr].getInstruction().getA().setValue(a_nr);
+        var a_nr = this.getANumber(a_adr);
+        a_nr = this.sanitizeAddress(a_nr - 1);
+        this.setANumber(b_adr, a_nr);
 
         if(a_nr != 0) {
           address = a_adr;
@@ -1338,10 +1345,9 @@ var Field = function(coreSize) {
         var address = pc + 1;
 
         // decrement B-number at B address
-        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
-        b_nr -= 1;
-        b_nr = this.sanitizeAddress(b_nr);
-        this.field[b_adr].getInstruction().getB().setValue(b_nr);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr = this.sanitizeAddress(b_nr - 1);
+        this.setBNumber(b_adr, b_nr);
 
         if(b_nr != 0) {
           address = a_adr;
@@ -1362,15 +1368,13 @@ var Field = function(coreSize) {
       case "i": {
         var address = pc + 1;
 
-        var a_nr = this.field[b_adr].getInstruction().getA().getValue();
-        a_nr -= 1;
-        a_nr = this.sanitizeAddress(a_nr);
-        this.field[b_adr].getInstruction().getA().setValue(a_nr);
+        var a_nr = this.getANumber(b_adr);
+        a_nr = this.sanitizeAddress(a_nr - 1);
+        this.setANumber(b_adr, a_nr);
 
-        var b_nr = this.field[b_adr].getInstruction().getB().getValue();
-        b_nr -= 1;
-        b_nr = this.sanitizeAddress(a_nr);
-        this.field[b_adr].getInstruction().getB().setValue(b_nr);
+        var b_nr = this.getBNumber(b_adr);
+        b_nr = this.sanitizeAddress(a_nr - 1);
+        this.setBNumber(b_adr, b_nr);
 
         if(a_nr != 0 || b_nr != 0) {
           address = a_adr;
