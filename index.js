@@ -1,4 +1,5 @@
 var field = new Field(8000, 20000);
+var colors = ['red', 'blue', 'green'];
 
 $('button.start-simulation').click(function(e) {
   e.preventDefault();
@@ -37,6 +38,8 @@ $('button.load-warrior').click(function(e) {
   var warrior = parser.getWarrior();
 
   var count = $('.warriors .warrior').length + 1;
+  var color = colors[count - 1];
+  warrior.setColor(color);
 
   $('.warrior-template')
     .clone()

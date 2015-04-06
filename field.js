@@ -1467,12 +1467,7 @@ Field.prototype.getField = function() {
  * If a warrior could not be placed on the field anymore, the function returns
  * false.
  */
-Field.prototype.addWarrior = function(warrior, color) {
-  var warrior = warrior;
-  if(color) {
-    warrior.setColor(color);
-  }
-
+Field.prototype.addWarrior = function(warrior) {
   this.warriors.push(warrior)
 
   // TODO: the first warrior may be placed at absolute 0, all others need some
@@ -1504,7 +1499,6 @@ Field.prototype.start = function(updateCallback) {
     return that.move();
   });
 };
-
 
 /**
  * Execute the operation of the currently active warrior if he is still alive,
