@@ -210,8 +210,8 @@ var Field = function(coreSize) {
         this.cmp(pc, modifier, a, b);
       }; break;
 
-      case "sltx": {
-
+      case "slt": {
+        this.slt(pc, modifier, a, b);
       }; break;
 
       case "splx": {
@@ -1556,7 +1556,136 @@ var Field = function(coreSize) {
   };
 
   this.slt = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
 
+    switch(modifier) {
+      /**
+       * A-number at A address < A-number at B address: pc + 2
+       * else: pc + 1
+       */
+      case "a": {
+        var address = pc + 1;
+        var a_nr_a = this.getANumber(a_adr);
+        var a_nr_b = this.getANumber(b_adr);
+
+        if(a_nr_a < a_nr_b) {
+          address = pc + 2;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * B-number at A address < B-number at B address: pc + 2
+       * else: pc + 1
+       */
+      case "b": {
+        var address = pc + 1;
+        var b_nr_a = this.getBNumber(a_adr);
+        var b_nr_b = this.getBNumber(b_adr);
+
+        if(b_nr_a < b_nr_b) {
+          address = pc + 2;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * A-number at A address < B-number at B address: pc + 2
+       * else: pc + 1
+       */
+      case "ab": {
+        var address = pc + 1;
+        var a_nr_a = this.getANumber(a_adr);
+        var b_nr_b = this.getBNumber(b_adr);
+
+        if(a_nr_a < b_nr_b) {
+          address = pc + 2;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * B-number at A address < A-number at B address: pc + 2
+       * else: pc + 1
+       */
+      case "ba": {
+        var address = pc + 1;
+        var b_nr_a = this.getBNumber(a_adr);
+        var a_nr_b = this.getANumber(b_adr);
+
+        if(b_nr_a < a_nr_b) {
+          address = pc + 2;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * A-number at A address < A-number at B address AND
+       * B-number at A address < B-number at B address: pc + 2
+       * else: pc + 1
+       */
+      case "f":
+      case "i": {
+        var address = pc + 1;
+        var a_nr_a = this.getANumber(a_adr);
+        var a_nr_b = this.getANumber(b_adr);
+        var b_nr_a = this.getBNumber(a_adr);
+        var b_nr_b = this.getBNumber(b_adr);
+
+        if((a_nr_a < a_nr_b) && (b_nr_a < b_nr_b)) {
+          address = pc + 2;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      /**
+       * A-number at A address < B-number at B address AND
+       * B-number at A address < A-number at B address: pc + 2
+       * else: pc + 1
+       */
+      case "x": {
+        var address = pc + 1;
+        var a_nr_a = this.getANumber(a_adr);
+        var a_nr_b = this.getANumber(b_adr);
+        var b_nr_a = this.getBNumber(a_adr);
+        var b_nr_b = this.getBNumber(b_adr);
+
+        if((a_nr_a < b_nr_b) && (b_nr_a < a_nr_b)) {
+          address = pc + 2;
+        }
+        address = this.sanitizeAddress(address);
+
+        this.warriors[this.currentWarrior].setPC(address);
+      }; break;
+
+      // Unknown modifier
+      default: {
+        console.log("CMP - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      this.field[a_adr].setLastAction("read");
+      this.field[b_adr].setLastAction("read");
+
+      touched.push(pc);
+      touched.push(a_adr);
+      touched.push(b_adr);
+
+      this.updateCallback(touched);
+    }
   };
 
   this.spl = function(pc, modifier, a, b) {
