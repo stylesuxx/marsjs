@@ -1,11 +1,39 @@
 var Warrior = function(code, start, author, name) {
   this.code = code;
   this.start = start;
+  this.queue = [];
+
   this.author = author;
   this.name = name;
-  this.pc = 0;
   this.color = "red";
 };
+
+/**
+ * Add a new address to the end of the PC queue
+ */
+Warrior.prototype.pushPC = function(address) {
+  this.queue.push(address);
+}
+
+/**
+ * Return the first address of the PC queue
+ */
+Warrior.prototype.shiftPC = function() {
+  var address = this.queue.shift();
+  if(address != undefined) {
+    return address;
+  }
+  else {
+    throw ("Requested address from a dead warrior");
+  }
+}
+
+/**
+ * Return true as long as the warrior has an address on the PC queue
+ */
+Warrior.prototype.isAlive = function() {
+  return (this.queue.length > 0);
+}
 
 Warrior.prototype.getAuthor = function() {
   return this.author;
@@ -27,22 +55,10 @@ Warrior.prototype.getCode = function() {
   return this.code;
 };
 
-Warrior.prototype.getPC = function() {
-  return this.pc;
+Warrior.prototype.setColor = function(color) {
+  this.color = color;
 };
-
-Warrior.prototype.setPC = function(pc) {
-  this.pc = pc;
-};
-
-Warrior.prototype.increasePC = function() {
-  this.pc += 1;
-}
 
 Warrior.prototype.getColor = function() {
   return this.color;
-};
-
-Warrior.prototype.setColor = function(color) {
-  this.color = color;
 };

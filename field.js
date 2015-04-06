@@ -2,14 +2,16 @@
  * The playing field consists of a memory aray that is linked from the last to
  * the first element and the size of coreSize.
  */
-var Field = function(coreSize) {
+var Field = function(coreSize, maxCycles) {
   this.coreSize = coreSize;
-  this.maxCycles = 80000;
+  this.maxCycles = maxCycles;
+  this.currentCycle = 0;
 
   this.field = []
   this.warriors = [];
   this.currentWarrior = 0;
   this.currentWarriorIndex = 0;
+  this.warriorsLeft = 0;
 
   this.updateCallback = null;
 
@@ -152,43 +154,41 @@ var Field = function(coreSize) {
       case "dat": {
         // TODO: check if address modes should be processed
         console.log("DAT executed at", pc);
-        throw "kill process";
       }; break;
 
       case "mov": {
         this.mov(pc, modifier, a, b);
-        this.currentWarrior.increasePC();
+        this.currentWarrior.pushPC(pc + 1);
       }; break;
 
       case "add": {
         this.add(pc, modifier, a, b);
-        this.currentWarrior.increasePC();
+        this.currentWarrior.pushPC(pc + 1);
       }; break;
 
       case "sub": {
         this.sub(pc, modifier, a, b);
-        this.currentWarrior.increasePC();
+        this.currentWarrior.pushPC(pc + 1);
       }; break;
 
       case "mul": {
         this.mul(pc, modifier, a, b);
-        this.currentWarrior.increasePC();
+        this.currentWarrior.pushPC(pc + 1);
       }; break;
 
       case "div": {
         try {
           this.div(pc, modifier, a, b);
-          this.currentWarrior.increasePC();
+          this.currentWarrior.pushPC(pc + 1);
         }
         catch(error) {
-          console.log("Division by zero");
-          throw "kill process";
+          console.log("Error at", pc, ":", error);
         }
       }; break;
 
       case "mod": {
         this.mod(pc, modifier, a, b);
-        this.currentWarrior.increasePC();
+        this.currentWarrior.pushPC(pc + 1);
       }; break;
 
       case "jmp": {
@@ -1151,7 +1151,7 @@ var Field = function(coreSize) {
       case "x":
       case "f":
       case "i": {
-        this.currentWarrior.setPC(a_adr);
+        this.currentWarrior.pushPC(a_adr);
       }; break;
 
       default: {
@@ -1187,7 +1187,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1203,7 +1203,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1221,7 +1221,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       default: {
@@ -1259,7 +1259,7 @@ var Field = function(coreSize) {
           address = a_adr;
         }
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1274,7 +1274,7 @@ var Field = function(coreSize) {
           address = a_adr;
         }
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1291,7 +1291,7 @@ var Field = function(coreSize) {
           address = a_adr;
         }
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       default: {
@@ -1333,7 +1333,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1355,7 +1355,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1382,7 +1382,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       default: {
@@ -1421,7 +1421,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1438,7 +1438,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1455,7 +1455,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1472,7 +1472,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1492,7 +1492,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1512,7 +1512,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1535,7 +1535,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       // Unknown modifier
@@ -1576,7 +1576,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1593,7 +1593,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1610,7 +1610,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1627,7 +1627,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1648,7 +1648,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       /**
@@ -1668,7 +1668,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.currentWarrior.setPC(address);
+        this.currentWarrior.pushPC(address);
       }; break;
 
       // Unknown modifier
@@ -1722,7 +1722,8 @@ Field.prototype.addWarrior = function(warrior, color) {
   // TODO: the first warrior may be placed at absolute 0, all others need some
   //       padding to the first but should be placed
   var position = (this.coreSize / this.warriors.length) % 8000;
-  warrior.setPC(position);
+  warrior.pushPC(position);
+
   var code = warrior.getCode();
   for(var i = 0; i < code.length; i++) {
     var current = position + i;
@@ -1740,20 +1741,61 @@ Field.prototype.addWarrior = function(warrior, color) {
  */
 Field.prototype.start = function(updateCallback) {
   this.updateCallback = updateCallback;
+  this.warriorsLeft = this.warriors.length;
+
   this.move();
 };
 
 /**
- * Execute the operation of the currently active warrior
+ * Execute the operation of the currently active warrior if he is still alive,
+ * otherwise move with the next warrior.
+ *
+ * If the simulation was started with only one warrior, keep on moving until
+ * maxCycles is reached or until he dies.
+ *
+ * If the simulation was started with more than one warrior, keep on moving
+ * until only one warrior is left, he is the winner.
  */
 Field.prototype.move = function() {
-  this.currentWarrior = this.warriors[this.currentWarriorIndex];
-  var pc = this.sanitizeAddress(this.currentWarrior.getPC());
+  if(this.currentCycle < this.maxCycles) {
+    this.currentWarrior = this.warriors[this.currentWarriorIndex];
 
-  console.log('Execute instructin at', pc);
-  this.executeInstruction(pc);
+    if(this.currentWarrior.isAlive()) {
+      var pc = this.currentWarrior.shiftPC()
+      pc = this.sanitizeAddress(pc);
 
-  // TODO: check if warrior is still alive
+      console.log('Execute instructin at', pc);
+      this.executeInstruction(pc);
 
-  this.currentWarriorIndex = (this.currentWarriorIndex + 1) % this.warriors.length;
+      if(!this.currentWarrior.isAlive()) {
+        console.log("Warrior died:", this.currentWarrior);
+        return;
+      }
+    }
+    else {
+      this.warriorsLeft -= 1;
+      console.log("Current warrior is dead, move with the next one.");
+    }
+
+    // TODO: check if we can execute a next move
+    if(this.warriorsLeft == 0) {
+      console.log("Single warrior died");
+      return;
+    }
+    else if (this.warriorsLeft == 1 && this.warriors.length > 1) {
+      console.log("Only one warrior is left, he is the winner");
+      return;
+    }
+
+    this.currentWarriorIndex = (this.currentWarriorIndex + 1) % this.warriors.length;
+
+    this.currentCycle += 1;
+
+    //Todo: Depending of given callbacks we either move without waiting for them
+    //      or we wait until it is called and move than
+  }
+  else {
+    console.log("Max cycles reached, simulation stopped - draw");
+    return;
+  }
 };
