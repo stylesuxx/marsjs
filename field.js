@@ -55,12 +55,12 @@ var Field = function(coreSize, maxCycles) {
     var pc = pc;
     var mode = parameter.getMode();
     var value = parameter.getValue();
-    var address = null;
+    var address = pc;
 
     // Pre decrement
     switch(mode) {
-      case "{": this.decrementAField(value); break;
-      case "<": this.decrementBField(value); break;
+      case "{": this.decrementAField(this.sanitizeAddress(pc + value)); break;
+      case "<": this.decrementBField(this.sanitizeAddress(pc + value)); break;
     }
 
     switch(mode) {
@@ -75,19 +75,19 @@ var Field = function(coreSize, maxCycles) {
       case "@":
       case "<":
       case ">": {
-        // get the value of the b field from pc+value
-        var position = (pc + value) % this.coreSize;
-        var instruction = this.field[position].getInstruction();
-        address = instruction.getB().getValue();
+        var position = this.sanitizeAddress(pc + value);
+        var b_nr = this.getBNumber(position);
+
+        address = this.sanitizeAddress(b_nr + position);
       }; break;
 
       case "*":
       case "{":
       case "}": {
-        // get the value of the a field from pc+value
-        var position = (pc + value) % this.coreSize;
-        var instruction = this.field[position].getInstruction();
-        address = instruction.getA().getValue();
+        var position = this.sanitizeAddress(pc + value);
+        var a_nr = this.getANumber(position);
+
+        address = this.sanitizeAddress(a_nr + position);
       }; break;
 
       default: {
@@ -97,8 +97,8 @@ var Field = function(coreSize, maxCycles) {
 
     // Post increment
     switch(mode) {
-      case "}": this.incrementAField(value); break;
-      case ">": this.incrementBField(value); break;
+      case "}": this.incrementAField(this.sanitizeAddress(pc + value)); break;
+      case ">": this.incrementBField(this.sanitizeAddress(pc + value)); break;
     }
 
     return this.sanitizeAddress(address);
@@ -1421,7 +1421,32 @@ var Field = function(coreSize, maxCycles) {
   };
 
   this.spl = function(pc, modifier, a, b) {
+    var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
 
+    switch(modifier) {
+      case "a":
+      case "b":
+      case "ab":
+      case "ba":
+      case "x":
+      case "f":
+      case "i": {
+        this.currentWarrior.pushPC(pc + 1);
+        this.currentWarrior.pushPC(a_adr);
+      }; break;
+
+      default: {
+        console.log("SPL - unknown modifier:", modifier);
+      }
+    }
+
+    if(this.updateCallback) {
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
+    }
   };
 
   this.initializField();
@@ -1505,7 +1530,7 @@ Field.prototype.move = function() {
       var pc = that.currentWarrior.shiftPC()
       pc = that.sanitizeAddress(pc);
 
-      console.log("Cycle:", that.currentCycle, 'execute', pc);
+      //console.log("Cycle:", that.currentCycle, 'execute', pc, that.field[pc]);
       that.executeInstruction(pc);
 
       if(!that.currentWarrior.isAlive()) {
