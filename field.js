@@ -332,9 +332,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
+      this.field[b_adr].setLastUser(this.currentWarrior);
 
       this.touched.push(pc);
       this.touched.push(a_adr);
@@ -434,9 +434,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
+      this.field[b_adr].setLastUser(this.currentWarrior);
 
       this.touched.push(pc);
       this.touched.push(a_adr);
@@ -536,9 +536,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
+      this.field[b_adr].setLastUser(this.currentWarrior);
 
       this.touched.push(pc);
       this.touched.push(a_adr);
@@ -638,9 +638,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
+      this.field[b_adr].setLastUser(this.currentWarrior);
 
       this.touched.push(pc);
       this.touched.push(a_adr);
@@ -770,9 +770,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
+      this.field[b_adr].setLastUser(this.currentWarrior);
 
       this.touched.push(pc);
       this.touched.push(a_adr);
@@ -871,9 +871,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
+      this.field[b_adr].setLastUser(this.currentWarrior);
 
       this.touched.push(pc);
       this.touched.push(a_adr);
@@ -903,6 +903,8 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
+      this.field[a_adr].setLastAction("read");
+
       this.touched.push(pc);
       this.touched.push(a_adr);
       this.touched.push(b_adr);
