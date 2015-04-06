@@ -28,6 +28,10 @@ Warrior.prototype.shiftPC = function() {
   }
 }
 
+Warrior.prototype.getQueue = function() {
+  return this.queue;
+}
+
 /**
  * Return true as long as the warrior has an address on the PC queue
  */
