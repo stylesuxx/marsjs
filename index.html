@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="parameter.js"></script>
+  <script src="instruction.js"></script>
+  <script src="warrior.js"></script>
+  <script src="cell.js"></script>
+  <script src="field.js"></script>
+  <script src="parser.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>mars-js</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <form class="form">
+          <div class="form-group">
+            <textarea class="warrior form-control" rows="10">
+START  ADD.AB #     4, $     3
+       MOV.I  $     2, @     2
+       JMP.B  $    -2, $     0
+       DAT.F  #     0, #     0
+            </textarea>
+          </div>
+          <p>
+            <button class="pull-right btn btn-primary load-warrior">add warrior</button>
+            <div class="clearfix"></div>
+          </p>
+        </form>
+      </div>
+
+      <div class="col-md-6 warriors">
+
+        <div class="warrior-template hidden">
+          <div class="warrior-info"></div>
+          <table class="table small">
+            <thead>
+              <th></th>
+              <th>Opcode</th>
+              <th>Mode</th>
+              <th>A</th>
+              <th>Mode</th>
+              <th>B</th>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="row controls hidden">
+      <div class="col-md-12">
+        <p>
+          <button class="pull-right btn btn-primary start-simulation">Start simulation</button>
+          <div class="clearfix"></div>
+        </p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12 field"></div>
+    </div>
+
+  </div>
+  <script src="index.js"></script>
+</body>
+</html>
