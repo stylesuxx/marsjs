@@ -13,7 +13,16 @@ var Field = function(coreSize, maxCycles) {
   this.currentWarriorIndex = 0;
   this.warriorsLeft = 0;
 
+  // Array of touched addresses passed to the update callback
+  this.touched = [];
   this.updateCallback = null;
+
+  // Trampoline to keep the stack flat
+  this.trampoline = function(fn) {
+    while(fn && typeof fn === 'function') {
+      fn = fn()
+    }
+  };
 
   // Initialize the field with "dat.f $0, $0"
   this.initializField = function() {
@@ -30,13 +39,9 @@ var Field = function(coreSize, maxCycles) {
   this.sanitizeAddress = function(value) {
     value = value % this.coreSize;
     if(value < 0) {
-      if((value * -1) > (this.coreSize /2)) {
+      if((value * -1) > (this.coreSize / 2)) {
         value = value + this.coreSize;
       }
-    }
-
-    if(value > (this.coreSize /2)) {
-      value = this.coreSize - value;
     }
 
     return value;
@@ -105,7 +110,7 @@ var Field = function(coreSize, maxCycles) {
     value -= 1;
     value = this.sanitizeAddress(value);
 
-    if(this.updateCallback) this.updateCallback([value]);
+    if(this.updateCallback) this.touched.push(value);
 
     a.setValue(value);
   };
@@ -116,7 +121,7 @@ var Field = function(coreSize, maxCycles) {
     value += 1;
     value = this.sanitizeAddress(value);
 
-    if(this.updateCallback) this.updateCallback(value);
+    if(this.updateCallback) this.touched.push(value);
 
     a.setValue(value);
   };
@@ -127,7 +132,7 @@ var Field = function(coreSize, maxCycles) {
     value -= 1;
     value = this.sanitizeAddress(value);
 
-    if(this.updateCallback) this.updateCallback(value);
+    if(this.updateCallback) this.touched.push(value);
 
     b.setValue(value);
   };
@@ -138,7 +143,7 @@ var Field = function(coreSize, maxCycles) {
     value += 1;
     value = this.sanitizeAddress(value);
 
-    if(this.updateCallback) this.updateCallback(value);
+    if(this.updateCallback) this.touched.push(value);
 
     b.setValue(value);
   };
@@ -247,337 +252,77 @@ var Field = function(coreSize, maxCycles) {
 
   this.mov = function(pc, modifier, a, b) {
     var touched = [];
+    var a_adr = this.getAddress(pc, a);
+    var b_adr = this.getAddress(pc, b);
+
     switch(modifier) {
       /**
-       * Use and write entire instructions
-       *
-       * + a & b are immediate: do nothing
-       * + b is immediate: only process a mode
-       * + else: copy instruction from A address to B address
+       * copy instruction from A address to instruction at B address
        */
       case "i": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          touched.push(pc);
-        }
-        else if(this.isImmediate(b)) {
-          a_adr = this.getAddress(a);
-          touched.push(pc);
-          touched.push(a_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var instruction = this.field[a_adr];
+        var instruction = this.field[a_adr];
 
-          this.field[b_adr] = Object.create(instruction);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[a_adr].setLastAction("read");
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+        this.field[b_adr] = Object.create(instruction);
       }; break;
 
       /**
-       * Use and write A-numbers
-       *
-       * + a & b are immediate: do nothing
-       * + a is immediate: move A-number to A-number of B address
-       * + else: move A-number of A address to A-number of B address
+       * copy A-number of A address to A-number of B address
        */
       case "a": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          touched.push(pc);
-        }
-        else if(this.isImmediate(a)) {
-          var value = a.getValue();
-          var b_adr = this.getAddress(pc, b);
+        var a_nr = this.getANumber(a_adr);
 
-          this.field[b_adr].getInstruction().getA().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(b_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var value = this.field[a_adr].getInstruction().getA().getValue();
-
-          this.field[b_adr].getInstruction().getA().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[a_adr].setLastAction("read");
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+        this.setANumber(b_adr, a_nr);
       }; break;
 
       /**
-       * Use and write B-numbers
-       *
-       * + a & b are immediate: do nothing
-       * + a is immediate: move B-number to B-number of B address
-       * + else: move B-number of A address to B-number of B address
+       * copy B-number of A address to B-number of B address
        */
       case "b": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          touched.push(pc);
-        }
-        else if(this.isImmediate(a)) {
-          var value = b.getValue();
-          var b_adr = this.getAddress(pc, b);
+        var b_nr = this.getBNumber(a_adr);
 
-          this.field[b_adr].getInstruction().getB().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(b_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var value = this.field[a_adr].getInstruction().getB().getValue();
-
-          this.field[b_adr].getInstruction().getB().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[a_adr].setLastAction("read");
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
-       * Use the A-numbers of the A-instructions and the B-numbers of the
-       * B-instructions and write B-numbers.
-       *
-       * + a & b are immediate: move A-number to B-number
-       * + a is immediate: move A-number to B-number of B address
-       * + else: move A-number of A address to B-number of B address
+       * copy A-number of A address to B-number of B address
       */
       case "ab": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          var value = a.getValue();
+        var a_nr = this.getANumber(a_adr);
 
-          b.setValue(value);
-
-          touched.push(pc);
-        }
-        else if(this.isImmediate(a)) {
-          var value = a.getValue();
-          var b_adr = this.getAddress(pc, b);
-
-          this.field[b_adr].getInstruction().getB().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(b_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var value = this.field[a_adr].getInstruction().getA().getValue();
-
-          this.field[b_adr].getInstruction().getB().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[a_adr].setLastAction("read");
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+        this.setBNumber(b_adr, a_nr);
       }; break;
 
       /**
-       * Use the B-numbers of the A-instructions and the A-numbers of the
-       * B-instructions and write A-numbers.
-       *
-       * + a & b are immediate: move B-number to A-number
-       * + a or b is immediate: move B-number to A-number of B address
-       * + else: move B-number of A address to A-number of B address
+       * copy B-number of A address to A-number of B address
        */
       case "ba": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          var value = b.getValue();
+        var b_nr = this.getBNumber(a_adr);
 
-          a.setValue(value);
-
-          touched.push(pc);
-        }
-        else if((this.isImmediate(a) && !this.isImmediate(b)) || (!this.isImmediate(a) && this.isImmediate(b))) {
-          var value = b.getValue();
-          var b_adr = this.getAddress(pc, b);
-
-          this.field[b_adr].getInstruction().getA().setValue(value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(b_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var value = this.field[a_adr].getInstruction().getB().getValue();
-
-          this.field[b_adr].getInstruction().getA().setValue(value);
-
-          this.field[a_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-          this.field[a_adr].setLastAction("read");
-
-          touched.push(pc);
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+        this.setANumber(b_adr, b_nr);
       }; break;
 
       /**
-       * Use both the A-numbers and the B-numbers, using and writing
-       * A-to-A, B-to-B.
-       *
-       * + a & b are immediate: do nothing
-       * + a is immediate: move A-number to A-number of B address
-       *                   move B-number to B-number of B address
-       * + b is immediate: move A-number of A address to A-number
-       *                   move B-number of A address to B-number
-       * + else: move A-number of A address to A-number of B address
-       *         move B-number of A address to B-number of B address
+       * copy A-number of A address to A-number of B address
+       * copy B-number of A address to B-number of B address
        */
       case "f": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          touched.push(pc);
-        }
-        else if(this.isImmediate(a) && !this.isImmediate(b)) {
-          var a_value = a.getValue();
-          var b_value = b.getValue();
-          var b_adr = this.getAddress(pc, b);
+        var a_nr = this.getANumber(a_adr);
+        var b_nr = this.getBNumber(a_adr);
 
-          this.field[b_adr].getInstruction().getA().setValue(a_value);
-          this.field[b_adr].getInstruction().getB().setValue(b_value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(b_adr);
-        }
-        else if(!this.isImmediate(a) && this.isImmediate(b)) {
-          var a_adr = this.getAddress(pc, a);
-          var a_value = this.field[a_adr].getInstruction().getA().getValue();
-          var b_value = this.field[a_adr].getInstruction().getB().getValue();
-
-          this.field[pc].getInstruction().getA().setValue(a_value);
-          this.field[pc].getInstruction().getB().setValue(b_value);
-
-          this.field[a_adr].setLastAction("read");
-
-          touched.push(pc);
-          touched.push(a_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var a_value = this.field[a_adr].getInstruction().getA().getValue();
-          var b_value = this.field[a_adr].getInstruction().getB().getValue();
-
-          this.field[b_adr].getInstruction().getA().setValue(a_value);
-          this.field[b_adr].getInstruction().getB().setValue(b_value);
-
-          this.field[a_adr].setLastAction("read");
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+        this.setANumber(b_adr, a_nr);
+        this.setBNumber(b_adr, b_nr);
       }; break;
 
       /**
-       * Use both the A-numbers and the B-numbers, using and writing
-       * A-to-B, B-to-A
-       *
-       * + a & b are immediate: swap A-number with B-number
-       * + a is immediate: move A-number to B-number of B address
-       *                   move B-number to A-number of B address
-       * + b is immediate: move A-number of A Address to B-number
-       *                   move B-number of A Address to A-number
-       * + else: move A-number of A address to B-number of B address
-       *         move B-number of A address to A-number of B address
+       * copy A-number of A address to B-number of B address
+       * copy B-number of A address to A-number of B address
        */
       case "x": {
-        if(this.isImmediate(a) && this.isImmediate(b)) {
-          var temp = a.getValue();
-          a.setValue(b.getValue());
-          b.setValue(temp);
+          var a_nr = this.getANumber(a_adr);
+          var b_nr = this.getBNumber(a_adr);
 
-          touched.push(pc);
-        }
-        else if(this.isImmediate(a) && !this.isImmediate(b)) {
-          var a_value = a.getValue();
-          var b_value = b.getValue();
-          var b_adr = this.getAddress(pc, b);
-
-          this.field[b_adr].getInstruction().getB().setValue(a_value);
-          this.field[b_adr].getInstruction().getA().setValue(b_value);
-
-          this.field[b_adr].setLastUser(this.currentWarrior);
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(b_adr);
-        }
-        else if(!this.isImmediate(a) && this.isImmediate(b)) {
-          var a_adr = this.getAddress(pc, a);
-          var a_value = this.field[a_adr].getInstruction().getA().getValue();
-          var b_value = this.field[a_adr].getInstruction().getB().getValue();
-
-          this.field[pc].getInstruction().getB().setValue(a_value);
-          this.field[pc].getInstruction().getA().setValue(b_value);
-
-          this.field[a_adr].setLastAction("read");
-
-          touched.push(pc);
-          touched.push(a_adr);
-        }
-        else {
-          var a_adr = this.getAddress(pc, a);
-          var b_adr = this.getAddress(pc, b);
-          var a_value = this.field[a_adr].getInstruction().getA().getValue();
-          var b_value = this.field[a_adr].getInstruction().getB().getValue();
-
-          this.field[b_adr].getInstruction().getB().setValue(a_value);
-          this.field[b_adr].getInstruction().getA().setValue(b_value);
-
-          this.field[a_adr].setLastAction("read");
-          this.field[b_adr].setLastAction("write");
-
-          touched.push(pc);
-          touched.push(a_adr);
-          touched.push(b_adr);
-        }
+          this.setANumber(b_adr, b_nr);
+          this.setBNumber(b_adr, a_nr);
       }; break;
 
       // Unknown modifier
@@ -586,7 +331,15 @@ var Field = function(coreSize, maxCycles) {
       }
     }
 
-    if(this.updateCallback) this.updateCallback(touched);
+    if(this.updateCallback) {
+      this.field[b_adr].setLastUser(this.currentWarrior);
+      this.field[a_adr].setLastAction("read");
+      this.field[b_adr].setLastAction("write");
+
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
+    }
   };
 
   this.add = function(pc, modifier, a, b) {
@@ -685,11 +438,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -789,11 +540,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -893,11 +642,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1027,11 +774,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1130,11 +875,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1160,11 +903,9 @@ var Field = function(coreSize, maxCycles) {
     }
 
     if(this.updateCallback) {
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1232,11 +973,9 @@ var Field = function(coreSize, maxCycles) {
     if(this.updateCallback) {
       this.field[a_adr].setLastAction("read");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1302,11 +1041,9 @@ var Field = function(coreSize, maxCycles) {
     if(this.updateCallback) {
       this.field[a_adr].setLastAction("read");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1393,11 +1130,9 @@ var Field = function(coreSize, maxCycles) {
     if(this.updateCallback) {
       this.field[a_adr].setLastAction("read");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1548,11 +1283,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("read");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1681,11 +1414,9 @@ var Field = function(coreSize, maxCycles) {
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("read");
 
-      touched.push(pc);
-      touched.push(a_adr);
-      touched.push(b_adr);
-
-      this.updateCallback(touched);
+      this.touched.push(pc);
+      this.touched.push(a_adr);
+      this.touched.push(b_adr);
     }
   };
 
@@ -1737,14 +1468,18 @@ Field.prototype.addWarrior = function(warrior, color) {
 };
 
 /**
- * Triggers the start of the simulation and executes the first move.
+ * Triggers the start of the simulation by executing the first move.
  */
 Field.prototype.start = function(updateCallback) {
   this.updateCallback = updateCallback;
   this.warriorsLeft = this.warriors.length;
 
-  this.move();
+  var that = this;
+  this.trampoline(function() {
+    return that.move();
+  });
 };
+
 
 /**
  * Execute the operation of the currently active warrior if he is still alive,
@@ -1757,45 +1492,51 @@ Field.prototype.start = function(updateCallback) {
  * until only one warrior is left, he is the winner.
  */
 Field.prototype.move = function() {
-  if(this.currentCycle < this.maxCycles) {
-    this.currentWarrior = this.warriors[this.currentWarriorIndex];
+  var that = this;
+  return function() {
+    if(that.currentCycle == that.maxCycles) {
+      console.log("max cycles reached");
+      return;
+    }
 
-    if(this.currentWarrior.isAlive()) {
-      var pc = this.currentWarrior.shiftPC()
-      pc = this.sanitizeAddress(pc);
+    that.currentWarrior = that.warriors[that.currentWarriorIndex];
 
-      console.log('Execute instructin at', pc);
-      this.executeInstruction(pc);
+    if(that.currentWarrior.isAlive()) {
+      var pc = that.currentWarrior.shiftPC()
+      pc = that.sanitizeAddress(pc);
 
-      if(!this.currentWarrior.isAlive()) {
-        console.log("Warrior died:", this.currentWarrior);
+      console.log("Cycle:", that.currentCycle, 'execute', pc);
+      that.executeInstruction(pc);
+
+      if(!that.currentWarrior.isAlive()) {
+        that.warriorsLeft -= 1;
+        console.log("Warrior died:", that.currentWarrior);
         return;
       }
     }
-    else {
-      this.warriorsLeft -= 1;
-      console.log("Current warrior is dead, move with the next one.");
-    }
 
-    // TODO: check if we can execute a next move
-    if(this.warriorsLeft == 0) {
+    if(that.warriorsLeft == 0) {
       console.log("Single warrior died");
       return;
     }
-    else if (this.warriorsLeft == 1 && this.warriors.length > 1) {
+    else if (that.warriorsLeft == 1 && that.warriors.length > 1) {
       console.log("Only one warrior is left, he is the winner");
       return;
     }
 
-    this.currentWarriorIndex = (this.currentWarriorIndex + 1) % this.warriors.length;
+    that.currentWarriorIndex = (that.currentWarriorIndex + 1) % that.warriors.length;
+    that.currentCycle += 1;
 
-    this.currentCycle += 1;
-
-    //Todo: Depending of given callbacks we either move without waiting for them
-    //      or we wait until it is called and move than
-  }
-  else {
-    console.log("Max cycles reached, simulation stopped - draw");
-    return;
+    if(that.updateCallback) {
+      that.updateCallback(that.touched, function() {
+        that.touched = [];
+        that.trampoline(function() {
+          return that.move();
+        });
+      });
+    }
+    else {
+      return that.move();
+    }
   }
 };
