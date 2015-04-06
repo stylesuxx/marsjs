@@ -9,6 +9,7 @@ var Field = function(coreSize) {
   this.field = []
   this.warriors = [];
   this.currentWarrior = 0;
+  this.currentWarriorIndex = 0;
 
   this.updateCallback = null;
 
@@ -156,28 +157,28 @@ var Field = function(coreSize) {
 
       case "mov": {
         this.mov(pc, modifier, a, b);
-        this.warriors[this.currentWarrior].increasePC();
+        this.currentWarrior.increasePC();
       }; break;
 
       case "add": {
         this.add(pc, modifier, a, b);
-        this.warriors[this.currentWarrior].increasePC();
+        this.currentWarrior.increasePC();
       }; break;
 
       case "sub": {
         this.sub(pc, modifier, a, b);
-        this.warriors[this.currentWarrior].increasePC();
+        this.currentWarrior.increasePC();
       }; break;
 
       case "mul": {
         this.mul(pc, modifier, a, b);
-        this.warriors[this.currentWarrior].increasePC();
+        this.currentWarrior.increasePC();
       }; break;
 
       case "div": {
         try {
           this.div(pc, modifier, a, b);
-          this.warriors[this.currentWarrior].increasePC();
+          this.currentWarrior.increasePC();
         }
         catch(error) {
           console.log("Division by zero");
@@ -187,7 +188,7 @@ var Field = function(coreSize) {
 
       case "mod": {
         this.mod(pc, modifier, a, b);
-        this.warriors[this.currentWarrior].increasePC();
+        this.currentWarrior.increasePC();
       }; break;
 
       case "jmp": {
@@ -270,7 +271,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr] = Object.create(instruction);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[a_adr].setLastAction("read");
           this.field[b_adr].setLastAction("write");
 
@@ -297,7 +298,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getA().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
 
           touched.push(pc);
@@ -310,7 +311,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getA().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[a_adr].setLastAction("read");
           this.field[b_adr].setLastAction("write");
 
@@ -338,7 +339,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getB().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
 
           touched.push(pc);
@@ -351,7 +352,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getB().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[a_adr].setLastAction("read");
           this.field[b_adr].setLastAction("write");
 
@@ -384,7 +385,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getB().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
 
           touched.push(pc);
@@ -397,7 +398,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getB().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[a_adr].setLastAction("read");
           this.field[b_adr].setLastAction("write");
 
@@ -430,7 +431,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getA().setValue(value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
 
           touched.push(pc);
@@ -443,7 +444,7 @@ var Field = function(coreSize) {
 
           this.field[b_adr].getInstruction().getA().setValue(value);
 
-          this.field[a_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[a_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
           this.field[a_adr].setLastAction("read");
 
@@ -477,7 +478,7 @@ var Field = function(coreSize) {
           this.field[b_adr].getInstruction().getA().setValue(a_value);
           this.field[b_adr].getInstruction().getB().setValue(b_value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
 
           touched.push(pc);
@@ -542,7 +543,7 @@ var Field = function(coreSize) {
           this.field[b_adr].getInstruction().getB().setValue(a_value);
           this.field[b_adr].getInstruction().getA().setValue(b_value);
 
-          this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+          this.field[b_adr].setLastUser(this.currentWarrior);
           this.field[b_adr].setLastAction("write");
 
           touched.push(pc);
@@ -680,7 +681,7 @@ var Field = function(coreSize) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
@@ -784,7 +785,7 @@ var Field = function(coreSize) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
@@ -888,7 +889,7 @@ var Field = function(coreSize) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
@@ -1022,7 +1023,7 @@ var Field = function(coreSize) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
@@ -1125,7 +1126,7 @@ var Field = function(coreSize) {
     }
 
     if(this.updateCallback) {
-      this.field[b_adr].setLastUser(this.warriors[this.currentWarrior]);
+      this.field[b_adr].setLastUser(this.currentWarrior);
       this.field[a_adr].setLastAction("read");
       this.field[b_adr].setLastAction("write");
 
@@ -1150,7 +1151,7 @@ var Field = function(coreSize) {
       case "x":
       case "f":
       case "i": {
-        this.warriors[this.currentWarrior].setPC(a_adr);
+        this.currentWarrior.setPC(a_adr);
       }; break;
 
       default: {
@@ -1186,7 +1187,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1202,7 +1203,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1220,7 +1221,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       default: {
@@ -1258,7 +1259,7 @@ var Field = function(coreSize) {
           address = a_adr;
         }
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1273,7 +1274,7 @@ var Field = function(coreSize) {
           address = a_adr;
         }
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1290,7 +1291,7 @@ var Field = function(coreSize) {
           address = a_adr;
         }
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       default: {
@@ -1332,7 +1333,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1354,7 +1355,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1381,7 +1382,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       default: {
@@ -1420,7 +1421,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1437,7 +1438,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1454,7 +1455,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1471,7 +1472,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1491,7 +1492,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1511,7 +1512,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1534,7 +1535,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       // Unknown modifier
@@ -1575,7 +1576,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1592,7 +1593,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1609,7 +1610,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1626,7 +1627,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1647,7 +1648,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       /**
@@ -1667,7 +1668,7 @@ var Field = function(coreSize) {
         }
         address = this.sanitizeAddress(address);
 
-        this.warriors[this.currentWarrior].setPC(address);
+        this.currentWarrior.setPC(address);
       }; break;
 
       // Unknown modifier
@@ -1746,11 +1747,13 @@ Field.prototype.start = function(updateCallback) {
  * Execute the operation of the currently active warrior
  */
 Field.prototype.move = function() {
-  var warrior = this.warriors[this.currentWarrior];
-  var pc = this.sanitizeAddress(warrior.getPC());
+  this.currentWarrior = this.warriors[this.currentWarriorIndex];
+  var pc = this.sanitizeAddress(this.currentWarrior.getPC());
 
   console.log('Execute instructin at', pc);
   this.executeInstruction(pc);
 
-  this.currentWarrior = (this.currentWarrior + 1) % this.warriors.length;
+  // TODO: check if warrior is still alive
+
+  this.currentWarriorIndex = (this.currentWarriorIndex + 1) % this.warriors.length;
 };
