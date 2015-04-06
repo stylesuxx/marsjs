@@ -220,8 +220,8 @@ var Field = function(coreSize, maxCycles) {
         this.slt(pc, modifier, a, b);
       }; break;
 
-      case "splx": {
-
+      case "spl": {
+        this.spl(pc, modifier, a, b);
       }; break;
 
       default: {
@@ -1475,7 +1475,7 @@ Field.prototype.addWarrior = function(warrior) {
   // TODO: the first warrior may be placed at absolute 0, all others need some
   //       padding to the first but should be placed
   var position = (this.coreSize / this.warriors.length) % 8000;
-  warrior.pushPC(position);
+  warrior.pushPC(position + warrior.getStart());
 
   var code = warrior.getCode();
   for(var i = 0; i < code.length; i++) {
