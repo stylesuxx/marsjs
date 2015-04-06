@@ -22,5 +22,6 @@ Instruction.prototype.getB = function () {
 };
 
 Instruction.prototype.toString = function () {
-  return this.opcode + '.' + this.modifier + ' ' + this.A.getMode() + this.A.getValue() + ', ' + this.B.getMode() + this.B.getValue();
+  var string = this.opcode + '.' + this.modifier + ' ' + this.A.getMode() + this.A.getValue() + ', ' + this.B.getMode() + this.B.getValue();
+  return string.toUpperCase();
 };
