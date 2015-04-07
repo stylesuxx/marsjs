@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     jshint: {
-      files: ['Gruntfile.js', '*.js', '!app.js'],
+      files: ['Gruntfile.js', 'src/*.js'],
       options: {
         shadow: true,
         evil: true,
@@ -13,8 +13,8 @@ module.exports = function(grunt) {
     },
     browserify: {
       main: {
-        src: 'index.js',
-        dest: 'app.js'
+        src: './src/index.js',
+        dest: './app.js'
       }
     },
     watch: {
