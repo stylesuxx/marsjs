@@ -22,13 +22,13 @@ $('button.start-simulation').click(function(e) {
         .attr('action', action)
         .attr('title', title)
         .css('background-color', color);
-    };
+    }
 
     // Give the screen some time to update and execute the callback
     setTimeout(function() {
       callback();
     }, 0);
-  }
+  };
 
   field.start(fieldUpdate);
   //field.start();
@@ -73,8 +73,8 @@ $('button.load-warrior').click(function(e) {
     var container = '';
     for(var i = 0; i < cells.length; i++) {
       var cell = cells[i];
-      var color = ''
-      if(user = cell.getLastUser()) {
+      var color = '';
+      if((user = cell.getLastUser())) {
         color = user.getColor();
         color = 'style="background-color: ' + color + ';"';
       }
