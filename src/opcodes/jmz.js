@@ -1,8 +1,8 @@
 var jmz = function(that, pc, modifier, a_adr, b_adr) {
   switch(modifier) {
     /**
-     * jump to A address if A-number of B address is 0
-     * else: increase the counter by one
+     * Queue A address if A-number of B address is 0
+     * else: Queue address of next instruction
      */
     case "a":
     case "ba": {
@@ -17,8 +17,8 @@ var jmz = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * jump to A address if B-number of B address is 0
-     * else: increase the counter by one
+     * Queue A address if B-number of B address is 0
+     * else: Queue address of next instruction
      */
     case "b":
     case "ab": {
@@ -33,8 +33,8 @@ var jmz = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * jump to A address if A-number and B-number of B address are 0
-     * else: increase the counter by one
+     * Queue A address if both, A-number and B-number of B address are 0
+     * else: Queue address of next instruction
      */
     case "x":
     case "f":
