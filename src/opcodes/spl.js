@@ -7,8 +7,8 @@ var spl = function(that, pc, modifier, a_adr, b_adr) {
     case "x":
     case "f":
     case "i": {
-      that.currentWarrior.pushPC(pc + 1);
-      that.currentWarrior.pushPC(a_adr);
+      that.currentWarrior.pushPC(that.sanitizeAddress(pc + 1));
+      that.currentWarrior.pushPC(that.sanitizeAddress(a_adr));
     } break;
 
     default: {
