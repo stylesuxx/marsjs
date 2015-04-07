@@ -32,7 +32,6 @@ var Field = function(coreSize, maxCycles) {
   this.currentWarriorIndex = 0;
   this.warriorsLeft = 0;
 
-  // Array of touched addresses passed to the update callback
   this.touched = [];
   this.updateCallback = null;
 
@@ -177,9 +176,10 @@ var Field = function(coreSize, maxCycles) {
   this.executeInstruction = function(pc) {
     var instruction = this.field[pc].getInstruction();
     var op = instruction.getOpcode();
-    var modifier = instruction.getModifier();
     var a = instruction.getA();
     var b = instruction.getB();
+
+    var modifier = instruction.getModifier();
     var a_adr = this.getAddress(pc, a);
     var b_adr = this.getAddress(pc, b);
 
