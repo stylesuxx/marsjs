@@ -1,9 +1,10 @@
 var djn = function(that, pc, modifier, a_adr, b_adr) {
   switch(modifier) {
     /**
-     * decrement A-number at B address
-     * if A-number at B address not 0: jump to A address
-     * else: increase the counter by one
+     * Decrement A-number at B address
+     *
+     * Queue A address if A-number of B address is NOT 0
+     * else: Queue address of next instruction
      */
     case "a":
     case "ba": {
@@ -21,9 +22,10 @@ var djn = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * decrement B-number at B address
-     * if B-number at B address not 0: jump to A address
-     * else: increase the counter by one
+     * Decrement B-number at B address
+     *
+     * Queue A address if B-number of B address is NOT 0
+     * else: Queue address of next instruction
      */
     case "b":
     case "ab": {
@@ -43,10 +45,11 @@ var djn = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * decrement A-number at B address
-     * decrement B-number at B address
-     * if A-number or B-number at B address not 0: jump to A address
-     * else: increase the counter by one
+     * Decrement A-number at B address
+     * Decrement B-number at B address
+     *
+     * Queue A address if A-number or B-number of B address are NOT 0
+     * else: Queue address of next instruction
      */
     case "f":
     case "x":
@@ -61,7 +64,7 @@ var djn = function(that, pc, modifier, a_adr, b_adr) {
       b_nr = that.sanitizeAddress(a_nr - 1);
       that.setBNumber(b_adr, b_nr);
 
-      if(a_nr !== 0 || b_nr !== 0) {
+      if((a_nr !== 0) || (b_nr !== 0)) {
         address = a_adr;
       }
       address = that.sanitizeAddress(address);

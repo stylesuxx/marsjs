@@ -16,7 +16,7 @@ var jmn = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * Queue B address if B-number of B address is NOT 0
+     * Queue A address if B-number of B address is NOT 0
      * else: Queue address of next instruction
      */
     case "b":
