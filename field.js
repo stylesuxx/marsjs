@@ -1,3 +1,7 @@
+var Cell = require('./cell');
+var Parameter = require('./parameter');
+var Instruction = require('./instruction');
+
 /**
  * The playing field consists of a memory aray that is linked from the last to
  * the first element and the size of coreSize.
@@ -7,7 +11,7 @@ var Field = function(coreSize, maxCycles) {
   this.maxCycles = maxCycles;
   this.currentCycle = 0;
 
-  this.field = []
+  this.field = [];
   this.warriors = [];
   this.currentWarrior = 0;
   this.currentWarriorIndex = 0;
@@ -20,7 +24,7 @@ var Field = function(coreSize, maxCycles) {
   // Trampoline to keep the stack flat
   this.trampoline = function(fn) {
     while(fn && typeof fn === 'function') {
-      fn = fn()
+      fn = fn();
     }
   };
 
@@ -52,7 +56,6 @@ var Field = function(coreSize, maxCycles) {
   };
 
   this.getAddress = function(pc, parameter) {
-    var pc = pc;
     var mode = parameter.getMode();
     var value = parameter.getValue();
     var address = pc;
@@ -66,11 +69,11 @@ var Field = function(coreSize, maxCycles) {
     switch(mode) {
       case "#": {
         address = pc;
-      }; break;
+      } break;
 
       case "$": {
         address = pc + value;
-      }; break;
+      } break;
 
       case "@":
       case "<":
@@ -79,7 +82,7 @@ var Field = function(coreSize, maxCycles) {
         var b_nr = this.getBNumber(position);
 
         address = this.sanitizeAddress(b_nr + position);
-      }; break;
+      } break;
 
       case "*":
       case "{":
@@ -88,7 +91,7 @@ var Field = function(coreSize, maxCycles) {
         var a_nr = this.getANumber(position);
 
         address = this.sanitizeAddress(a_nr + position);
-      }; break;
+      } break;
 
       default: {
         console.log("Unsupported addressing mode", mode);
@@ -151,27 +154,27 @@ var Field = function(coreSize, maxCycles) {
       case "dat": {
         // TODO: check if address modes should be processed
         console.log("DAT executed at", pc);
-      }; break;
+      } break;
 
       case "mov": {
         this.mov(pc, modifier, a, b);
         this.currentWarrior.pushPC(pc + 1);
-      }; break;
+      } break;
 
       case "add": {
         this.add(pc, modifier, a, b);
         this.currentWarrior.pushPC(pc + 1);
-      }; break;
+      } break;
 
       case "sub": {
         this.sub(pc, modifier, a, b);
         this.currentWarrior.pushPC(pc + 1);
-      }; break;
+      } break;
 
       case "mul": {
         this.mul(pc, modifier, a, b);
         this.currentWarrior.pushPC(pc + 1);
-      }; break;
+      } break;
 
       case "div": {
         try {
@@ -181,40 +184,40 @@ var Field = function(coreSize, maxCycles) {
         catch(error) {
           console.log("Error at", pc, ":", error);
         }
-      }; break;
+      } break;
 
       case "mod": {
         this.mod(pc, modifier, a, b);
         this.currentWarrior.pushPC(pc + 1);
-      }; break;
+      } break;
 
       case "jmp": {
         this.jmp(pc, modifier, a, b);
-      }; break;
+      } break;
 
       case "jmz": {
         this.jmz(pc, modifier, a, b);
-      }; break;
+      } break;
 
       case "jmn": {
         this.jmz(pc, modifier, a, b);
-      }; break;
+      } break;
 
       case "djn": {
         this.djn(pc, modifier, a, b);
-      }; break;
+      } break;
 
       case "cmp": {
         this.cmp(pc, modifier, a, b);
-      }; break;
+      } break;
 
       case "slt": {
         this.slt(pc, modifier, a, b);
-      }; break;
+      } break;
 
       case "spl": {
         this.spl(pc, modifier, a, b);
-      }; break;
+      } break;
 
       default: {
         console.log(op, 'not implemented');
@@ -228,7 +231,7 @@ var Field = function(coreSize, maxCycles) {
 
   this.setANumber = function(address, value) {
     this.field[address].getInstruction().getA().setValue(value);
-  }
+  };
 
   this.getBNumber = function(address) {
     return this.field[address].getInstruction().getB().getValue();
@@ -236,7 +239,7 @@ var Field = function(coreSize, maxCycles) {
 
   this.setBNumber = function(address, value) {
     this.field[address].getInstruction().getB().setValue(value);
-  }
+  };
 
   /**
    * Opcode implementations
@@ -255,7 +258,7 @@ var Field = function(coreSize, maxCycles) {
         var instruction = this.field[a_adr];
 
         this.field[b_adr] = Object.create(instruction);
-      }; break;
+      } break;
 
       /**
        * copy A-number of A address to A-number of B address
@@ -264,7 +267,7 @@ var Field = function(coreSize, maxCycles) {
         var a_nr = this.getANumber(a_adr);
 
         this.setANumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * copy B-number of A address to B-number of B address
@@ -273,7 +276,7 @@ var Field = function(coreSize, maxCycles) {
         var b_nr = this.getBNumber(a_adr);
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * copy A-number of A address to B-number of B address
@@ -282,7 +285,7 @@ var Field = function(coreSize, maxCycles) {
         var a_nr = this.getANumber(a_adr);
 
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * copy B-number of A address to A-number of B address
@@ -291,7 +294,7 @@ var Field = function(coreSize, maxCycles) {
         var b_nr = this.getBNumber(a_adr);
 
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * copy A-number of A address to A-number of B address
@@ -303,7 +306,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setANumber(b_adr, a_nr);
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * copy A-number of A address to B-number of B address
@@ -315,7 +318,7 @@ var Field = function(coreSize, maxCycles) {
 
           this.setANumber(b_adr, b_nr);
           this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -356,7 +359,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setANumber(b_adr, a_nr);
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * add A-number of A address to A-number of B address
@@ -367,7 +370,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setANumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * add B-number of A address to B-number of B address
@@ -378,7 +381,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * add A-number of A address to B-number of B address
@@ -389,7 +392,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * add B-number of A address to A-number of B address
@@ -400,7 +403,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * add A-number of A address to B-number of B address
@@ -417,7 +420,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setANumber(b_adr, b_nr);
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -458,7 +461,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setANumber(b_adr, a_nr);
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * subtract A-number of A address from A-number of B address
@@ -469,7 +472,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setANumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * subtract B-number of A address from B-number of B address
@@ -480,7 +483,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * subtract A-number of A address from B-number of B address
@@ -491,7 +494,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * subtract B-number of A address from A-number of B address
@@ -502,7 +505,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * subtract A-number of A address from B-number of B address
@@ -519,7 +522,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setBNumber(b_adr, a_nr);
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -560,7 +563,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setANumber(b_adr, a_nr);
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * multiply A-number of A address with A-number of B address
@@ -571,7 +574,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setANumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * multiply B-number of A address with B-number of B address
@@ -582,7 +585,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * multiply A-number of A address with B-number of B address
@@ -593,7 +596,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * multiply B-number of A address with A-number of B address
@@ -604,7 +607,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * multiply A-number of A address with B-number of B address
@@ -621,7 +624,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setBNumber(b_adr, a_nr);
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -662,12 +665,11 @@ var Field = function(coreSize, maxCycles) {
 
         if(isNaN(a_nr) || isNaN(b_nr)) {
           throw "Division by 0";
-          return;
         }
 
         this.setANumber(b_adr, a_nr);
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * divide A-number of B address by A-number of A address
@@ -679,11 +681,10 @@ var Field = function(coreSize, maxCycles) {
 
         if(isNaN(a_nr)) {
           throw "Division by 0";
-          return;
         }
 
         this.setANumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * divide B-number of B address by B-number of A address
@@ -695,11 +696,10 @@ var Field = function(coreSize, maxCycles) {
 
         if(isNaN(b_nr)) {
           throw "Division by 0";
-          return;
         }
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * divide B-number of B address by A-number of A address
@@ -711,11 +711,10 @@ var Field = function(coreSize, maxCycles) {
 
         if(isNaN(a_nr)) {
           throw "Division by 0";
-          return;
         }
 
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * divide A-number of B address by B-number of A address
@@ -727,11 +726,10 @@ var Field = function(coreSize, maxCycles) {
 
         if(isNaN(b_nr)) {
           throw "Division by 0";
-          return;
         }
 
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * divide B-number of B address by A-number of A address
@@ -748,12 +746,11 @@ var Field = function(coreSize, maxCycles) {
 
         if(isNaN(a_nr) || isNaN(b_nr)) {
           throw "Division by 0";
-          return;
         }
 
         this.setBNumber(b_adr, a_nr);
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -794,7 +791,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setANumber(b_adr, a_nr);
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * mod A-number of B address by A-number of A address
@@ -805,7 +802,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setANumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * mod B-number of B address by B-number of A address
@@ -816,7 +813,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setBNumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * mod B-number of B address by A-number of A address
@@ -827,7 +824,7 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr);
 
         this.setBNumber(b_adr, a_nr);
-      }; break;
+      } break;
 
       /**
        * mod A-number of B address by B-number of A address
@@ -838,7 +835,7 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr);
 
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       /**
        * mod B-number of B address by A-number of A address
@@ -855,7 +852,7 @@ var Field = function(coreSize, maxCycles) {
 
         this.setBNumber(b_adr, a_nr);
         this.setANumber(b_adr, b_nr);
-      }; break;
+      } break;
 
       default: {
         console.log("MOD - unknown modifier:", modifier);
@@ -887,7 +884,7 @@ var Field = function(coreSize, maxCycles) {
       case "f":
       case "i": {
         this.currentWarrior.pushPC(a_adr);
-      }; break;
+      } break;
 
       default: {
         console.log("JMP - unknown modifier:", modifier);
@@ -917,13 +914,13 @@ var Field = function(coreSize, maxCycles) {
       case "ba": {
         var address = pc +1;
         var a_nr = this.getANumber(b_adr);
-        if(a_nr == 0) {
+        if(a_nr === 0) {
           address = a_adr;
         }
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * jump to A address if B-number of B address is 0
@@ -933,13 +930,13 @@ var Field = function(coreSize, maxCycles) {
       case "ab": {
         var address = pc + 1;
         var b_nr = this.getBNumber(b_adr);
-        if(b_nr == 0) {
+        if(b_nr === 0) {
           address = a_adr;
         }
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * jump to A address if A-number and B-number of B address are 0
@@ -951,13 +948,13 @@ var Field = function(coreSize, maxCycles) {
         var address = pc + 1;
         var a_nr = this.getANumber(b_adr);
         var b_nr = this.getBNumber(b_adr);
-        if(a_nr == 0 && b_nr == 0) {
+        if(a_nr === 0 && b_nr === 0) {
           address = a_adr;
         }
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       default: {
         console.log("JMZ - unknown modifier:", modifier);
@@ -988,12 +985,12 @@ var Field = function(coreSize, maxCycles) {
       case "ba": {
         var address = pc +1;
         var a_nr = this.getANumber(b_adr);
-        if(a_nr != 0) {
+        if(a_nr !== 0) {
           address = a_adr;
         }
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * jump to A address if B-number of B address is not 0
@@ -1003,12 +1000,12 @@ var Field = function(coreSize, maxCycles) {
       case "ab": {
         var address = pc + 1;
         var b_nr = this.getBNumber(b_adr);
-        if(b_nr != 0) {
+        if(b_nr !== 0) {
           address = a_adr;
         }
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * jump to A address if either A-number or B-number of B address is not 0
@@ -1020,12 +1017,12 @@ var Field = function(coreSize, maxCycles) {
         var address = pc + 1;
         var a_nr = this.getANumber(b_adr);
         var b_nr = this.getBNumber(b_adr);
-        if(a_nr != 0 && b_nr != 0) {
+        if(a_nr !== 0 && b_nr !== 0) {
           address = a_adr;
         }
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       default: {
         console.log("JMN - unknown modifier:", modifier);
@@ -1059,13 +1056,13 @@ var Field = function(coreSize, maxCycles) {
         a_nr = this.sanitizeAddress(a_nr - 1);
         this.setANumber(b_adr, a_nr);
 
-        if(a_nr != 0) {
+        if(a_nr !== 0) {
           address = a_adr;
         }
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * decrement B-number at B address
@@ -1081,13 +1078,13 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(b_nr - 1);
         this.setBNumber(b_adr, b_nr);
 
-        if(b_nr != 0) {
+        if(b_nr !== 0) {
           address = a_adr;
         }
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * decrement A-number at B address
@@ -1108,13 +1105,13 @@ var Field = function(coreSize, maxCycles) {
         b_nr = this.sanitizeAddress(a_nr - 1);
         this.setBNumber(b_adr, b_nr);
 
-        if(a_nr != 0 || b_nr != 0) {
+        if(a_nr !== 0 || b_nr !== 0) {
           address = a_adr;
         }
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       default: {
         console.log("DJN - unknown modifier:", modifier);
@@ -1151,7 +1148,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * B-number at A address == B-number at B address: pc + 2
@@ -1168,7 +1165,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * A-number at A address == B-number at B address: pc + 2
@@ -1185,7 +1182,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * B-number at A address == A-number at B address: pc + 2
@@ -1202,7 +1199,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * A-number at A address == A-number at B address AND
@@ -1222,7 +1219,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * A-number at A address == B-number at B address AND
@@ -1242,7 +1239,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * Instruction at A address == Instruction at B address: pc + 2
@@ -1265,7 +1262,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -1304,7 +1301,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * B-number at A address < B-number at B address: pc + 2
@@ -1321,7 +1318,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * A-number at A address < B-number at B address: pc + 2
@@ -1338,7 +1335,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * B-number at A address < A-number at B address: pc + 2
@@ -1355,7 +1352,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * A-number at A address < A-number at B address AND
@@ -1376,7 +1373,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       /**
        * A-number at A address < B-number at B address AND
@@ -1396,7 +1393,7 @@ var Field = function(coreSize, maxCycles) {
         address = this.sanitizeAddress(address);
 
         this.currentWarrior.pushPC(address);
-      }; break;
+      } break;
 
       // Unknown modifier
       default: {
@@ -1429,7 +1426,7 @@ var Field = function(coreSize, maxCycles) {
       case "i": {
         this.currentWarrior.pushPC(pc + 1);
         this.currentWarrior.pushPC(a_adr);
-      }; break;
+      } break;
 
       default: {
         console.log("SPL - unknown modifier:", modifier);
@@ -1462,7 +1459,7 @@ Field.prototype.getField = function() {
  * false.
  */
 Field.prototype.addWarrior = function(warrior) {
-  this.warriors.push(warrior)
+  this.warriors.push(warrior);
 
   // TODO: the first warrior may be placed at absolute 0, all others need some
   //       padding to the first but should be placed
@@ -1515,7 +1512,7 @@ Field.prototype.move = function() {
     that.currentWarrior = that.warriors[that.currentWarriorIndex];
 
     if(that.currentWarrior.isAlive()) {
-      var pc = that.currentWarrior.shiftPC()
+      var pc = that.currentWarrior.shiftPC();
       pc = that.sanitizeAddress(pc);
 
       //console.log("Cycle:", that.currentCycle, 'execute', pc, that.field[pc]);
@@ -1528,7 +1525,7 @@ Field.prototype.move = function() {
       }
     }
 
-    if(that.warriorsLeft == 0) {
+    if(that.warriorsLeft === 0) {
       console.log("Single warrior died");
       return;
     }
@@ -1551,5 +1548,7 @@ Field.prototype.move = function() {
     else {
       return that.move();
     }
-  }
+  };
 };
+
+module.exports = Field;
