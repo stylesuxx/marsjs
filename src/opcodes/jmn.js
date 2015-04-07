@@ -1,9 +1,8 @@
 var jmn = function(that, pc, modifier, a_adr, b_adr) {
   switch(modifier) {
     /**
-     * decrement A-number of B Address
-     * decrement A-number
-     * else: increase the counter by one
+     * Queue A address if A-number of B address is NOT 0
+     * else: Queue address of next instruction
      */
     case "a":
     case "ba": {
@@ -17,8 +16,8 @@ var jmn = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * jump to A address if B-number of B address is not 0
-     * else: increase the counter by one
+     * Queue B address if B-number of B address is NOT 0
+     * else: Queue address of next instruction
      */
     case "b":
     case "ab": {
@@ -32,8 +31,8 @@ var jmn = function(that, pc, modifier, a_adr, b_adr) {
     } break;
 
     /**
-     * jump to A address if either A-number or B-number of B address is not 0
-     * else: increase the counter by one
+     * Queue A address if either A-number or B-number of B address is NOT 0
+     * else: Queue address of next instruction
      */
     case "f":
     case "x":
@@ -41,7 +40,7 @@ var jmn = function(that, pc, modifier, a_adr, b_adr) {
       var address = pc + 1;
       var a_nr = that.getANumber(b_adr);
       var b_nr = that.getBNumber(b_adr);
-      if(a_nr !== 0 && b_nr !== 0) {
+      if((a_nr !== 0) && (b_nr !== 0)) {
         address = a_adr;
       }
 
