@@ -13,3 +13,4 @@ For development:
 
 References:
 http://www.koth.org/info/pmars-redcode-94.txt
+http://www.corewars.org/docs/94spec.html

@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     jshint: {
-      files: ['Gruntfile.js', 'src/*.js'],
+      files: ['Gruntfile.js', 'src/**/*.js'],
       options: {
         shadow: true,
         evil: true,
