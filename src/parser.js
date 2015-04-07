@@ -1,3 +1,7 @@
+var Warrior = require('./warrior');
+var Instruction = require('./instruction');
+var Parameter = require('./parameter');
+
 var Parser = function (text) {
   this.opcodes = ['dat', 'mov', 'add', 'sub', 'mul', 'div', 'mod', 'jmp', 'jmz', 'jmn', 'djn', 'spl', 'cmp', 'seq', 'sne', 'slt', 'ldp', 'stp', 'nop'];
   this.modifiers = ['a', 'b', 'ab', 'ba', 'f', 'x', 'i'];
@@ -38,7 +42,7 @@ var Parser = function (text) {
       case 'ldp':
       case 'stp': {
         return;
-      }; break;
+      } break;
 
       case 'nop':
       case 'spl':
@@ -49,7 +53,7 @@ var Parser = function (text) {
         else {
           this.b = new Parameter('$', '0');
         }
-      }; break;
+      } break;
 
       case 'dat': {
         if (this.a && this.b) {
@@ -60,8 +64,8 @@ var Parser = function (text) {
           this.b = tmp;
           this.a = new Parameter('#', '0');
         }
-      }; break;
-    };
+      } break;
+    }
   };
 
   this.isValidParameters = function(opcode, a, b) {
@@ -82,11 +86,11 @@ var Parser = function (text) {
       case 'ldp':
       case 'stp': {
         return (a && b);
-      }; break;
+      } break;
       default: {
         return (a);
       }
-    };
+    }
   };
 
   this.getModifier = function(opcode, a, b) {
@@ -94,7 +98,7 @@ var Parser = function (text) {
       case 'dat':
       case 'nop': {
         return 'f';
-      }; break;
+      } break;
 
       case 'jmp':
       case 'jmz':
@@ -102,7 +106,7 @@ var Parser = function (text) {
       case 'djn':
       case 'spl': {
         return 'b';
-      }; break;
+      } break;
 
       case 'slt':
       case 'ldp':
@@ -111,7 +115,7 @@ var Parser = function (text) {
           return 'ab';
         }
         return 'b';
-      }; break;
+      } break;
 
       case 'add':
       case 'sub':
@@ -125,7 +129,7 @@ var Parser = function (text) {
           return 'b';
         }
         return 'f';
-      }; break;
+      } break;
 
       case 'mov':
       case 'seq':
@@ -138,7 +142,7 @@ var Parser = function (text) {
           return 'b';
         }
         return 'i';
-      }; break;
+      } break;
     }
   };
 
@@ -186,7 +190,7 @@ var Parser = function (text) {
       }
     }
     // One parameter
-    else if(params.length == 1 && params[0] != '') {
+    else if(params.length == 1 && params[0] !== '') {
       if(this.modes.indexOf(params[0][0]) > -1) {
         this.a = new Parameter(params[0][0], params[0].substring(1));
       }
@@ -213,7 +217,7 @@ var Parser = function (text) {
 
 
     return instruction;
-  }
+  };
 
   /**
    * Trim whitespaces, replace multiple whitespaces, align comments, strip empty
@@ -230,7 +234,7 @@ var Parser = function (text) {
         .replace(/;\s?/g, ';')
         .trim();
 
-      if(line != '') {
+      if(line !== '') {
         sanitized.push(line);
       }
     }
@@ -249,7 +253,7 @@ var Parser = function (text) {
     for(var i = 0; i < text.length; i++) {
       var line = text[i];
 
-      if(line.indexOf('org') == 0) {
+      if(line.indexOf('org') === 0) {
         var value = line.split(' ')[1];
         if(isNaN(value)) {
           this.startAlias = value;
@@ -260,7 +264,7 @@ var Parser = function (text) {
 
         continue;
       }
-      else if(line.indexOf('end') == 0) {
+      else if(line.indexOf('end') === 0) {
         if(line.split(' ').length > 1) {
           var value = line.split(' ')[1];
           if(isNaN(value)) {
@@ -273,12 +277,12 @@ var Parser = function (text) {
 
         break;
       }
-      else if(line.indexOf(';') == 0) {
-        if(index = line.indexOf('author') > -1) {
+      else if(line.indexOf(';') === 0) {
+        if((index = line.indexOf('author')) > -1) {
           this.author = line.substring(index + 7).trim();
         }
 
-        if(index = line.indexOf('name') > -1) {
+        if((index = line.indexOf('name')) > -1) {
           this.name = line.substring(index + 5).trim();
         }
 
@@ -288,13 +292,13 @@ var Parser = function (text) {
         line = line.substring(0, index).trim();
       }
 
-      if(line != '') {
+      if(line !== '') {
         cleaned.push(line);
       }
     }
 
     return cleaned;
-  }
+  };
 
   /**
    * Parse all the variables, save them to an array, sort them by length
@@ -335,7 +339,7 @@ var Parser = function (text) {
     this.variables = tmp;
 
     return noVars;
-  }
+  };
 
   /**
    * Replace all variables inside the variables and inside the code
@@ -399,7 +403,7 @@ var Parser = function (text) {
         word = word.split('.')[0].trim();
       }
       word = word.toLowerCase();
-      if(index = this.opcodes.indexOf(word) < 0) {
+      if((index = this.opcodes.indexOf(word)) < 0) {
         var label = line.split(' ')[0].trim();
         line = line.substring(index + label.length).trim();
         this.labels[label] = i;
@@ -434,7 +438,7 @@ var Parser = function (text) {
     }
 
     return stripped;
-  }
+  };
 
   /**
    * Expand the first for found in the code. After the first for is found, we
@@ -455,7 +459,7 @@ var Parser = function (text) {
       var forCount = 0;
       var rofFound = false;
 
-      if(text.length == 0){
+      if(text.length === 0){
         expanded = true;
         continue;
       }
@@ -481,7 +485,7 @@ var Parser = function (text) {
             }
             if(line.indexOf('rof') > -1) {
               forCount -= 1;
-              if(forCount == 0) {
+              if(forCount === 0) {
                 rofLine = j;
                 rofFound = true;
               }
@@ -498,13 +502,13 @@ var Parser = function (text) {
               repeat = this.parseExpression(repeat, forLine);
             }
 
-            for(var i = 0; i < repeat; i++) {
+            for(i = 0; i < repeat; i++) {
               var current = block.slice();
 
               // We may need to replace index variables
-              if(index != 0) {
+              if(index !== 0) {
                 var label = text[forLine].split('for')[0].trim();
-                for(var j = 0; j < current.length; j++) {
+                for(j = 0; j < current.length; j++) {
                   var replace = i + 1;
                   if(replace < 10) {
                     replace = '0' + replace;
@@ -535,7 +539,6 @@ var Parser = function (text) {
    * Returns the numeric number of an expression
    */
   this.parseExpression = function(expression, line) {
-    var expression = expression;
     expression = expression.split('&').join('');
 
     // Replace all variables
@@ -562,13 +565,13 @@ var Parser = function (text) {
     expression = expression.split('--').join('+');
 
     var result = eval(expression);
-    result = result % this.coreSize
+    result = result % this.coreSize;
     if(result > this.coreSize/2) {
       result = result - this.coreSize;
     }
 
     return Math.floor(result);
-  }
+  };
 
   /**
    * Evaluate all expressions
@@ -638,7 +641,7 @@ var Parser = function (text) {
     }
 
     return evaluated;
-  }
+  };
 
   /**
    * Lowercase all opcodes
@@ -653,7 +656,7 @@ var Parser = function (text) {
     }
 
     return lowerCase;
-  }
+  };
 
   /**
    * Check opcodes and throw an error if an invalid line was found
@@ -662,14 +665,14 @@ var Parser = function (text) {
     var program = [];
     for(var i = 0; i < text.length; i++) {
       var line = text[i];
-      if(line != '') {
+      if(line !== '') {
         var instruction = this.parseLine(line);
         program.push(instruction);
       }
     }
 
     return program;
-  }
+  };
 
   text = this.sanitize(text);
   text = this.parseComments(text);
@@ -690,4 +693,6 @@ Parser.prototype.getWarrior = function () {
   var warrior = new Warrior(this.program, this.start, this.author, this.name);
 
   return warrior;
-}
+};
+
+module.exports = Parser;

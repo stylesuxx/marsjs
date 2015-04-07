@@ -29,3 +29,5 @@ Cell.prototype.setLastUser = function(warrior) {
 Cell.prototype.getLastUser = function() {
   return this.lastUser;
 };
+
+module.exports = Cell;

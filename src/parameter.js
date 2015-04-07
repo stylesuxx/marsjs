@@ -14,3 +14,5 @@ Parameter.prototype.getValue = function() {
 Parameter.prototype.getMode = function() {
   return this.mode;
 };
+
+module.exports = Parameter;
