@@ -13,31 +13,31 @@ var Warrior = function(code, start, author, name) {
  */
 Warrior.prototype.pushPC = function(address) {
   this.queue.push(address);
-}
+};
 
 /**
  * Return the first address of the PC queue
  */
 Warrior.prototype.shiftPC = function() {
   var address = this.queue.shift();
-  if(address != undefined) {
+  if(address !== undefined) {
     return address;
   }
   else {
     throw ("Requested address from a dead warrior");
   }
-}
+};
 
 Warrior.prototype.getQueue = function() {
   return this.queue;
-}
+};
 
 /**
  * Return true as long as the warrior has an address on the PC queue
  */
 Warrior.prototype.isAlive = function() {
   return (this.queue.length > 0);
-}
+};
 
 Warrior.prototype.getAuthor = function() {
   return this.author;
