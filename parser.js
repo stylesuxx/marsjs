@@ -1,3 +1,7 @@
+var Warrior = require('./warrior');
+var Instruction = require('./instruction');
+var Parameter = require('./parameter');
+
 var Parser = function (text) {
   this.opcodes = ['dat', 'mov', 'add', 'sub', 'mul', 'div', 'mod', 'jmp', 'jmz', 'jmn', 'djn', 'spl', 'cmp', 'seq', 'sne', 'slt', 'ldp', 'stp', 'nop'];
   this.modifiers = ['a', 'b', 'ab', 'ba', 'f', 'x', 'i'];
@@ -691,3 +695,5 @@ Parser.prototype.getWarrior = function () {
 
   return warrior;
 }
+
+module.exports = Parser;

@@ -25,3 +25,5 @@ Instruction.prototype.toString = function () {
   var string = this.opcode + '.' + this.modifier + ' ' + this.A.getMode() + this.A.getValue() + ', ' + this.B.getMode() + this.B.getValue();
   return string.toUpperCase();
 };
+
+module.exports = Instruction;

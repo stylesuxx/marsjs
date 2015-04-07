@@ -1,3 +1,7 @@
+var Cell = require('./cell');
+var Parameter = require('./parameter');
+var Instruction = require('./instruction');
+
 /**
  * The playing field consists of a memory aray that is linked from the last to
  * the first element and the size of coreSize.
@@ -1553,3 +1557,5 @@ Field.prototype.move = function() {
     }
   }
 };
+
+module.exports = Field;

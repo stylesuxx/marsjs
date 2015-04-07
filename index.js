@@ -1,3 +1,6 @@
+var Field = require('./field');
+var Parser = require('./parser');
+
 var field = new Field(8000, 20000);
 var colors = ['red', 'blue', 'green'];
 

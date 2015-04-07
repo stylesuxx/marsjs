@@ -66,3 +66,5 @@ Warrior.prototype.setColor = function(color) {
 Warrior.prototype.getColor = function() {
   return this.color;
 };
+
+module.exports = Warrior;
