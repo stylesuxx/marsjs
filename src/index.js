@@ -5,38 +5,136 @@ $(document).ready(function() {
   var field = new Field(8000, 20000);
   var colors = ['red', 'blue', 'green'];
 
-  $('button.start-simulation').click(function(e) {
-    e.preventDefault();
+  var debug = false;
 
-    var fieldUpdate = function(touched, callback) {
-      var cells = field.getField();
-      for(var i = 0; i < touched.length; i++) {
-        var index = touched[i];
-        var cell = cells[index];
-        var action = cell.getLastAction();
-        var color = 'grey';
-        if(cell.getLastUser()) {
-          color = cell.getLastUser().getColor();
-        }
-        var title = index + ': ' + cell.getInstruction().toString();
-        $('.field .cell[index=' + index + ']')
-          .attr('action', action)
-          .attr('title', title)
-          .css('background-color', color);
+  var updateField = function(touched, currentWarrior, callback) {
+    var cells = field.getField();
+    for(var i = 0; i < touched.length; i++) {
+      var index = touched[i];
+      var cell = cells[index];
+      var action = cell.getLastAction();
+      var color = 'grey';
+      if(cell.getLastUser()) {
+        color = cell.getLastUser().getColor();
       }
+      var title = index + ': ' + cell.getInstruction().toString();
+      $('.field .cell[index=' + index + ']')
+        .attr('action', action)
+        .attr('title', title)
+        .css('background-color', color);
+    }
 
-      // Give the screen some time to update and execute the callback
+    // Give the screen some time to update and execute the callback
+    if(!debug) {
       setTimeout(function() {
         callback();
       }, 0);
-    };
+    }
+    // Wait for the user to press the next button
+    else {
+      var pc = currentWarrior.getQueue()[0];
+      var instruction = cells[pc].getInstruction();
 
-    field.start(fieldUpdate);
-    //field.start();
+      $('.debug-info .next-instruction')
+        .html(instruction.toString());
+
+      pc = ("0000" + pc).slice(-4);
+      $('.debug-info .pc')
+        .html(pc);
+
+      $('button.next').bind('click', function(e) {
+        e.preventDefault();
+
+        $('button.next').unbind('click');
+        callback();
+      });
+    }
+  };
+
+  $('button.step-simulation').click(function(e) {
+    e.preventDefault();
+
+    debug = true;
+
+    var pc = 1;
+    var instruction = field.getField()[1].getInstruction();
+    $('.debug-info .next-instruction')
+      .html(instruction.toString());
+
+    pc = ("0000" + pc).slice(-4);
+    $('.debug-info .pc')
+      .html(pc);
+
+    $('button.start-simulation').hide();
+    $('button.step-simulation').hide();
+
+    $('button.next')
+      .removeClass('hidden');
+    $('button.continue')
+      .removeClass('hidden');
+    $('.debug-info')
+      .removeClass('hidden');
+
+
+    field.start(updateField);
+  });
+
+  $('button.pause').click(function(e) {
+    e.preventDefault();
+
+    debug = true;
+
+    $('button.start-simulation').hide();
+    $('button.step-simulation').hide();
+    $('button.pause').hide();
+
+    $('button.next').removeClass('hidden').show();
+    $('button.continue').removeClass('hidden').show();
+    $('.debug-info').removeClass('hidden').show();
+
+  });
+
+  $('button.continue').click(function(e) {
+    e.preventDefault();
+
+    debug = false;
+
+    $('button.pause')
+      .removeClass('hidden')
+      .show();
+
+    $('button.next').hide();
+    $('button.continue').hide();
+    $('.debug-info').hide();
+    $('button.pause')
+      .removeClass('hidden');
+
+    $('button.next').click();
+  });
+
+  $('button.start-simulation').click(function(e) {
+    e.preventDefault();
+
+    $('button.pause')
+      .removeClass('hidden');
+
+    $('button.start-simulation').hide();
+    $('button.step-simulation').hide();
+
+    field.start(updateField);
+  });
+
+  $('button.start-simulation-no-visuals').click(function(e) {
+    e.preventDefault();
+
+    field.start();
   });
 
   $('button.load-warrior').click(function(e) {
     e.preventDefault();
+
+    $('button.load-warrior').attr('disabled', true);
+
     var text = $('textarea.warrior').val().split('\n');
     var parser = new Parser(text);
     var warrior = parser.getWarrior();
@@ -88,6 +186,8 @@ $(document).ready(function() {
     };
 
     field.addWarrior(warrior);
+
+    $('button.load-warrior').attr('disabled', false);
 
     var cells = field.getField();
     drawField(cells);
