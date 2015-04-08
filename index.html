@@ -55,12 +55,14 @@ start: ADD.AB #     4, $     3
     </div>
 
     <div class="row controls hidden">
-      <div class="col-md-6 debug-info">
-        <p>
-          <strong>Instruction @ </strong>
-          <strong class="pc"></strong>
-          <span class="next-instruction"></span>
-        </p>
+      <div class="col-md-6">
+        <div class="debug-info hidden">
+          <p>
+            <strong>Instruction @ </strong>
+            <strong class="pc"></strong>
+            <span class="next-instruction"></span>
+          </p>
+        </div>
       </div>
       <div class="col-md-6">
         <div class="pull-right">
@@ -68,7 +70,7 @@ start: ADD.AB #     4, $     3
             <button class="btn btn-primary step-simulation">Step simulation</button>
             <button class="btn btn-primary start-simulation">Run simulation</button>
             <button class="hidden btn btn-primary pause">Pause</button>
-            <button class="hidden btn btn-primary resume">Resume</button>
+            <button class="hidden btn btn-primary continue">Continue</button>
             <button class="hidden btn btn-primary next">Step</button>
           </p>
         </div>

@@ -32,7 +32,6 @@ $(document).ready(function() {
     }
     // Wait for the user to press the next button
     else {
-      // TODO: display the next instruction to be executed
       var pc = currentWarrior.getQueue()[0];
       var instruction = cells[pc].getInstruction();
 
@@ -71,14 +70,56 @@ $(document).ready(function() {
 
     $('button.next')
       .removeClass('hidden');
+    $('button.continue')
+      .removeClass('hidden');
     $('.debug-info')
       .removeClass('hidden');
+
 
     field.start(updateField);
   });
 
+  $('button.pause').click(function(e) {
+    e.preventDefault();
+
+    debug = true;
+
+    $('button.start-simulation').hide();
+    $('button.step-simulation').hide();
+    $('button.pause').hide();
+
+    $('button.next').removeClass('hidden').show();
+    $('button.continue').removeClass('hidden').show();
+    $('.debug-info').removeClass('hidden').show();
+
+  });
+
+  $('button.continue').click(function(e) {
+    e.preventDefault();
+
+    debug = false;
+
+    $('button.pause')
+      .removeClass('hidden')
+      .show();
+
+    $('button.next').hide();
+    $('button.continue').hide();
+    $('.debug-info').hide();
+    $('button.pause')
+      .removeClass('hidden');
+
+    $('button.next').click();
+  });
+
   $('button.start-simulation').click(function(e) {
     e.preventDefault();
+
+    $('button.pause')
+      .removeClass('hidden');
+
+    $('button.start-simulation').hide();
+    $('button.step-simulation').hide();
 
     field.start(updateField);
   });
