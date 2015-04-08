@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
   <script src="app.js"></script>
 </head>
 
@@ -15,164 +16,183 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-md-4">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Instruction</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>DAT</td>
-              <td>terminate process</td>
-            </tr>
-            <tr>
-              <td>MOV</td>
-              <td>move from A to B</td>
-            </tr>
-            <tr>
-              <td>ADD</td>
-              <td>add A to B, store result in B</td>
-            </tr>
-            <tr>
-              <td>SUB</td>
-              <td>subtract A from B, store result in B</td>
-            </tr>
-            <tr>
-              <td>MUL</td>
-              <td>multiply A by B, store result in B</td>
-            </tr>
-            <tr>
-              <td>DIV</td>
-              <td>divide B by A, store result in B if A &gt; 0, else terminate</td>
-            </tr>
-            <tr>
-              <td>MOD</td>
-              <td>divide B by A, store remainder in B if A &gt; 0, else terminate</td>
-            </tr>
-            <tr>
-              <td>JMP</td>
-              <td>transfer execution to A</td>
-            </tr>
-            <tr>
-              <td>JMZ</td>
-              <td>transfer execution to A if B is zero</td>
-            </tr>
-            <tr>
-              <td>JMN</td>
-              <td>transfer execution to A if B is non-zero</td>
-            </tr>
-            <tr>
-              <td>DJN</td>
-              <td>decrement B, if B is non-zero, transfer execution to A</td>
-            </tr>
-            <tr>
-              <td>SPL</td>
-              <td>split off process to A</td>
-            </tr>
-            <tr>
-              <td>SLT</td>
-              <td>skip next instruction if A is less than B</td>
-            </tr>
-            <tr>
-              <td>CMP</td>
-              <td>Skip next instruction if A is equal to B</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="col-md-12">
+        <div class="panel-group" id="accordion">
+          <div class="panel panel-default" id="panel1">
+            <div class="panel-heading">
+               <h4 class="panel-title">
+                  <a data-toggle="collapse" data-target="#Quickreference"
+             href="#Quickreference">Instruction and addressing mode cheatsheet</a>
+                </h4>
+            </div>
+            <div id="Quickreference" class="panel-collapse collapse">
+              <div class="panel-body">
+
+                <div class="col-md-4">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Instruction</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>DAT</td>
+                        <td>terminate process</td>
+                      </tr>
+                      <tr>
+                        <td>MOV</td>
+                        <td>move from A to B</td>
+                      </tr>
+                      <tr>
+                        <td>ADD</td>
+                        <td>add A to B, store result in B</td>
+                      </tr>
+                      <tr>
+                        <td>SUB</td>
+                        <td>subtract A from B, store result in B</td>
+                      </tr>
+                      <tr>
+                        <td>MUL</td>
+                        <td>multiply A by B, store result in B</td>
+                      </tr>
+                      <tr>
+                        <td>DIV</td>
+                        <td>divide B by A, store result in B if A &gt; 0, else terminate</td>
+                      </tr>
+                      <tr>
+                        <td>MOD</td>
+                        <td>divide B by A, store remainder in B if A &gt; 0, else terminate</td>
+                      </tr>
+                      <tr>
+                        <td>JMP</td>
+                        <td>transfer execution to A</td>
+                      </tr>
+                      <tr>
+                        <td>JMZ</td>
+                        <td>transfer execution to A if B is zero</td>
+                      </tr>
+                      <tr>
+                        <td>JMN</td>
+                        <td>transfer execution to A if B is non-zero</td>
+                      </tr>
+                      <tr>
+                        <td>DJN</td>
+                        <td>decrement B, if B is non-zero, transfer execution to A</td>
+                      </tr>
+                      <tr>
+                        <td>SPL</td>
+                        <td>split off process to A</td>
+                      </tr>
+                      <tr>
+                        <td>SLT</td>
+                        <td>skip next instruction if A is less than B</td>
+                      </tr>
+                      <tr>
+                        <td>CMP</td>
+                        <td>Skip next instruction if A is equal to B</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-md-4">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Modifier</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>.A</td>
+                        <td>Instructions read and write A-fields</td>
+                      </tr>
+                      <tr>
+                        <td>.B</td>
+                        <td>Instructions read and write B-fields</td>
+                      </tr>
+                      <tr>
+                        <td>.AB</td>
+                        <td>Instructions read the A-field of the A-instruction and
+                   the B-field of the B-instruction and write to B-fields</td>
+                      </tr>
+                      <tr>
+                        <td>.BA</td>
+                        <td>Instructions read the B-field of the A-instruction and
+                   the A-field of the B-instruction and write to A-fields</td>
+                      </tr>
+                      <tr>
+                        <td>.F</td>
+                        <td>Instructions read both A- and B-fields of the the A-
+                   and B-instruction and write to both A- and B-fields (A
+                   to A and B to B)</td>
+                      </tr>
+                      <tr>
+                        <td>.X</td>
+                        <td>Instructions read both A- and B-fields of the the A-
+                   and B-instruction and write to both A- and B-fields
+                   exchanging fields (A to B and B to A)</td>
+                      </tr>
+                      <tr>
+                        <td>.I</td>
+                        <td>Instructions read and write entire instructions</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-md-4">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Mode</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>#</td>
+                        <td>immediate</td>
+                      </tr>
+                      <tr>
+                        <td>$</td>
+                        <td>direct</td>
+                      </tr>
+                      <tr>
+                        <td>@</td>
+                        <td>indirect using B-field</td>
+                      </tr>
+                      <tr>
+                        <td>&lt;</td>
+                        <td>predecrement, indirect using B-field</td>
+                      </tr>
+                      <tr>
+                        <td>&gt;</td>
+                        <td>postincrement, indirect using B-field</td>
+                      </tr>
+                      <tr>
+                        <td>*</td>
+                        <td>indirect using A-field</td>
+                      </tr>
+                      <tr>
+                        <td>{</td>
+                        <td>predecrement, indirect using A-field</td>
+                      </tr>
+                      <tr>
+                        <td>}</td>
+                        <td>postincrement, indirect using A-field</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-md-4">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Modifier</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>.A</td>
-              <td>Instructions read and write A-fields</td>
-            </tr>
-            <tr>
-              <td>.B</td>
-              <td>Instructions read and write B-fields</td>
-            </tr>
-            <tr>
-              <td>.AB</td>
-              <td>Instructions read the A-field of the A-instruction and
-         the B-field of the B-instruction and write to B-fields</td>
-            </tr>
-            <tr>
-              <td>.BA</td>
-              <td>Instructions read the B-field of the A-instruction and
-         the A-field of the B-instruction and write to A-fields</td>
-            </tr>
-            <tr>
-              <td>.F</td>
-              <td>Instructions read both A- and B-fields of the the A-
-         and B-instruction and write to both A- and B-fields (A
-         to A and B to B)</td>
-            </tr>
-            <tr>
-              <td>.X</td>
-              <td>Instructions read both A- and B-fields of the the A-
-         and B-instruction and write to both A- and B-fields
-         exchanging fields (A to B and B to A)</td>
-            </tr>
-            <tr>
-              <td>.I</td>
-              <td>Instructions read and write entire instructions</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="col-md-4">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Mode</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>#</td>
-              <td>immediate</td>
-            </tr>
-            <tr>
-              <td>$</td>
-              <td>direct</td>
-            </tr>
-            <tr>
-              <td>@</td>
-              <td>indirect using B-field</td>
-            </tr>
-            <tr>
-              <td>&lt;</td>
-              <td>predecrement, indirect using B-field</td>
-            </tr>
-            <tr>
-              <td>&gt;</td>
-              <td>postincrement, indirect using B-field</td>
-            </tr>
-            <tr>
-              <td>*</td>
-              <td>indirect using A-field</td>
-            </tr>
-            <tr>
-              <td>{</td>
-              <td>predecrement, indirect using A-field</td>
-            </tr>
-            <tr>
-              <td>}</td>
-              <td>postincrement, indirect using A-field</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
     </div>
     <div class="row">
       <div class="col-md-6">
