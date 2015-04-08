@@ -25,8 +25,60 @@
           </thead>
           <tbody>
             <tr>
-              <td></td>
-              <td></td>
+              <td>DAT</td>
+              <td>terminate process</td>
+            </tr>
+            <tr>
+              <td>MOV</td>
+              <td>move from A to B</td>
+            </tr>
+            <tr>
+              <td>ADD</td>
+              <td>add A to B, store result in B</td>
+            </tr>
+            <tr>
+              <td>SUB</td>
+              <td>subtract A from B, store result in B</td>
+            </tr>
+            <tr>
+              <td>MUL</td>
+              <td>multiply A by B, store result in B</td>
+            </tr>
+            <tr>
+              <td>DIV</td>
+              <td>divide B by A, store result in B if A &gt; 0, else terminate</td>
+            </tr>
+            <tr>
+              <td>MOD</td>
+              <td>divide B by A, store remainder in B if A &gt; > 0, else terminate</td>
+            </tr>
+            <tr>
+              <td>JMP</td>
+              <td>transfer execution to A</td>
+            </tr>
+            <tr>
+              <td>JMZ</td>
+              <td>transfer execution to A if B is zero</td>
+            </tr>
+            <tr>
+              <td>JMN</td>
+              <td>transfer execution to A if B is non-zero</td>
+            </tr>
+            <tr>
+              <td>DJN</td>
+              <td>decrement B, if B is non-zero, transfer execution to A</td>
+            </tr>
+            <tr>
+              <td>SPL</td>
+              <td>split off process to A</td>
+            </tr>
+            <tr>
+              <td>SLT</td>
+              <td>skip next instruction if A is less than B</td>
+            </tr>
+            <tr>
+              <td>CMP</td>
+              <td>Skip next instruction if A is equal to B</td>
             </tr>
           </tbody>
         </table>
