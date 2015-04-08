@@ -15,4 +15,12 @@ Parameter.prototype.getMode = function() {
   return this.mode;
 };
 
+Parameter.prototype.clone = function() {
+  var mode = this.mode;
+  var value = this.value;
+  var clone = new Parameter(mode, value);
+
+  return clone;
+};
+
 module.exports = Parameter;

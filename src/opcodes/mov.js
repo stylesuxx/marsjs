@@ -4,9 +4,10 @@ var mov = function(that, pc, modifier, a_adr, b_adr) {
      * copy instruction from A address to instruction at B address
      */
     case "i": {
-      var instruction = that.field[a_adr];
+      var instruction = that.field[a_adr].getInstruction();
+      var clone = instruction.clone();
 
-      that.field[b_adr] = Object.create(instruction);
+      that.field[b_adr].setInstruction(clone);
     } break;
 
     /**
