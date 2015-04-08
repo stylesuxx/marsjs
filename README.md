@@ -1,6 +1,8 @@
 # marsjs
 Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in JavaScript and easily accessible through the browser.
 
+**Live Demo**: http://stylesuxx.github.io/marsjs/
+
 ## Features
 * debugging (single stepping through the code)
 
