@@ -307,6 +307,7 @@ Field.prototype.addWarrior = function(warrior) {
 Field.prototype.start = function(updateCallback) {
   this.updateCallback = updateCallback;
   this.warriorsLeft = this.warriors.length;
+  this.currentWarrior = this.warriors[0];
 
   var that = this;
   this.trampoline(function() {
@@ -326,26 +327,22 @@ Field.prototype.start = function(updateCallback) {
  */
 Field.prototype.move = function() {
   var that = this;
+
   return function() {
     if(that.currentCycle == that.maxCycles) {
       console.log("max cycles reached");
       return;
     }
 
-    that.currentWarrior = that.warriors[that.currentWarriorIndex];
+    var pc = that.currentWarrior.shiftPC();
+    pc = that.sanitizeAddress(pc);
 
-    if(that.currentWarrior.isAlive()) {
-      var pc = that.currentWarrior.shiftPC();
-      pc = that.sanitizeAddress(pc);
+    that.executeInstruction(pc);
 
-      //console.log("Cycle:", that.currentCycle, 'execute', pc, that.field[pc]);
-      that.executeInstruction(pc);
-
-      if(!that.currentWarrior.isAlive()) {
-        that.warriorsLeft -= 1;
-        console.log("Warrior died:", that.currentWarrior);
-        return;
-      }
+    if(!that.currentWarrior.isAlive()) {
+      that.warriorsLeft -= 1;
+      console.log("Warrior died:", that.currentWarrior);
+      return;
     }
 
     if(that.warriorsLeft === 0) {
@@ -357,11 +354,15 @@ Field.prototype.move = function() {
       return;
     }
 
-    that.currentWarriorIndex = (that.currentWarriorIndex + 1) % that.warriors.length;
+    do {
+      that.currentWarriorIndex = (that.currentWarriorIndex + 1) % that.warriors.length;
+      that.currentWarrior = that.warriors[that.currentWarriorIndex];
+    } while(!that.currentWarrior.isAlive());
+
     that.currentCycle += 1;
 
     if(that.updateCallback) {
-      that.updateCallback(that.touched, function() {
+      that.updateCallback(that.touched, that.currentWarrior, function() {
         that.touched = [];
         that.trampoline(function() {
           return that.move();
