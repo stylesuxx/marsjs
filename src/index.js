@@ -132,6 +132,9 @@ $(document).ready(function() {
 
   $('button.load-warrior').click(function(e) {
     e.preventDefault();
+
+    $('button.load-warrior').attr('disabled', true);
+
     var text = $('textarea.warrior').val().split('\n');
     var parser = new Parser(text);
     var warrior = parser.getWarrior();
@@ -183,6 +186,8 @@ $(document).ready(function() {
     };
 
     field.addWarrior(warrior);
+
+    $('button.load-warrior').attr('disabled', false);
 
     var cells = field.getField();
     drawField(cells);
