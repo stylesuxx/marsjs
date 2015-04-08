@@ -5,34 +5,68 @@ $(document).ready(function() {
   var field = new Field(8000, 20000);
   var colors = ['red', 'blue', 'green'];
 
-  $('button.start-simulation').click(function(e) {
-    e.preventDefault();
+  var debug = false;
 
-    var fieldUpdate = function(touched, callback) {
-      var cells = field.getField();
-      for(var i = 0; i < touched.length; i++) {
-        var index = touched[i];
-        var cell = cells[index];
-        var action = cell.getLastAction();
-        var color = 'grey';
-        if(cell.getLastUser()) {
-          color = cell.getLastUser().getColor();
-        }
-        var title = index + ': ' + cell.getInstruction().toString();
-        $('.field .cell[index=' + index + ']')
-          .attr('action', action)
-          .attr('title', title)
-          .css('background-color', color);
+  var updateField = function(touched, callback) {
+    console.log("Update field");
+
+    var cells = field.getField();
+    for(var i = 0; i < touched.length; i++) {
+      var index = touched[i];
+      var cell = cells[index];
+      var action = cell.getLastAction();
+      var color = 'grey';
+      if(cell.getLastUser()) {
+        color = cell.getLastUser().getColor();
       }
+      var title = index + ': ' + cell.getInstruction().toString();
+      $('.field .cell[index=' + index + ']')
+        .attr('action', action)
+        .attr('title', title)
+        .css('background-color', color);
+    }
 
-      // Give the screen some time to update and execute the callback
+    // Give the screen some time to update and execute the callback
+    if(!debug) {
       setTimeout(function() {
         callback();
       }, 0);
-    };
+    }
+    // Wait for the user to press the next button
+    else {
+      $('button.next').bind('click', function(e) {
+        e.preventDefault();
 
-    field.start(fieldUpdate);
-    //field.start();
+        $('button.next').unbind('click');
+        callback();
+      });
+    }
+  };
+
+  $('button.step-simulation').click(function(e) {
+    e.preventDefault();
+
+    debug = true;
+
+    $('button.start-simulation').hide();
+    $('button.step-simulation').hide();
+
+    $('button.next')
+      .removeClass('hidden');
+
+    field.start(updateField);
+  });
+
+  $('button.start-simulation').click(function(e) {
+    e.preventDefault();
+
+    field.start(updateField);
+  });
+
+  $('button.start-simulation-no-visuals').click(function(e) {
+    e.preventDefault();
+
+    field.start();
   });
 
   $('button.load-warrior').click(function(e) {
