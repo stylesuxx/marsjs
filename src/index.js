@@ -7,9 +7,7 @@ $(document).ready(function() {
 
   var debug = false;
 
-  var updateField = function(touched, callback) {
-    console.log("Update field");
-
+  var updateField = function(touched, currentWarrior, callback) {
     var cells = field.getField();
     for(var i = 0; i < touched.length; i++) {
       var index = touched[i];
@@ -34,6 +32,17 @@ $(document).ready(function() {
     }
     // Wait for the user to press the next button
     else {
+      // TODO: display the next instruction to be executed
+      var pc = currentWarrior.getQueue()[0];
+      var instruction = cells[pc].getInstruction();
+
+      $('.debug-info .next-instruction')
+        .html(instruction.toString());
+
+      pc = ("0000" + pc).slice(-4);
+      $('.debug-info .pc')
+        .html(pc);
+
       $('button.next').bind('click', function(e) {
         e.preventDefault();
 
@@ -48,10 +57,21 @@ $(document).ready(function() {
 
     debug = true;
 
+    var pc = 1;
+    var instruction = field.getField()[1].getInstruction();
+    $('.debug-info .next-instruction')
+      .html(instruction.toString());
+
+    pc = ("0000" + pc).slice(-4);
+    $('.debug-info .pc')
+      .html(pc);
+
     $('button.start-simulation').hide();
     $('button.step-simulation').hide();
 
     $('button.next')
+      .removeClass('hidden');
+    $('.debug-info')
       .removeClass('hidden');
 
     field.start(updateField);
