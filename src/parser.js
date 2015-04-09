@@ -70,6 +70,11 @@ var Parser = function (text) {
 
   this.isValidParameters = function(opcode, a, b) {
     switch(opcode) {
+      case 'jmp':
+      case 'dat': {
+        return (a);
+      } break;
+
       case 'mov':
       case 'add':
       case 'sub':
@@ -87,8 +92,9 @@ var Parser = function (text) {
       case 'stp': {
         return (a && b);
       } break;
+
       default: {
-        return (a);
+        return false;
       }
     }
   };
