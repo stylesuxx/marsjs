@@ -152,11 +152,10 @@ var Parser = function (text) {
 
   this.parseLine = function(line) {
     var instruction = null;
-    var original = line;
+    var original = line.substr(0);
 
     // Get the opcode and potential modifier
     var opcode = line.split(' ')[0];
-    line = line.substring(opcode.length).trim();
     var modifier = null;
     if(opcode.indexOf('.') > -1) {
       modifier = opcode.split('.')[1];
@@ -164,9 +163,14 @@ var Parser = function (text) {
     }
 
     if(!this.isValidOpcode(opcode)) {
-      throw 'Invalid opcode: ' + opcode + ' (' + line + ')';
+      throw 'Invalid opcode: ' + opcode + ' (' + original + ')';
     }
 
+    if(this.modifiers.indexOf(modifier) < 0) {
+      throw 'Invalid modifier: ' + modifier + ' (' + original + ')';
+    }
+
+    line = line.substring(opcode.length).trim();
     var params = line.split(',');
 
     this.a = null;
