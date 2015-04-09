@@ -160,14 +160,14 @@ var Parser = function (text) {
     if(opcode.indexOf('.') > -1) {
       modifier = opcode.split('.')[1];
       opcode = opcode.split('.')[0];
+
+      if(this.modifiers.indexOf(modifier) < 0) {
+        throw 'Invalid modifier: ' + modifier + ' (' + original + ')';
+      }
     }
 
     if(!this.isValidOpcode(opcode)) {
       throw 'Invalid opcode: ' + opcode + ' (' + original + ')';
-    }
-
-    if(this.modifiers.indexOf(modifier) < 0) {
-      throw 'Invalid modifier: ' + modifier + ' (' + original + ')';
     }
 
     line = line.substring(opcode.length + modifier.length + 1).trim();
