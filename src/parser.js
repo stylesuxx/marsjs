@@ -403,9 +403,9 @@ var Parser = function (text) {
         word = word.split('.')[0].trim();
       }
       word = word.toLowerCase();
-      if((index = this.opcodes.indexOf(word)) < 0) {
+      if(this.opcodes.indexOf(word) < 0) {
         var label = line.split(' ')[0].trim();
-        line = line.substring(index + label.length).trim();
+        line = line.substring(label.length).trim();
         this.labels[label] = i;
         stripped[i] = line;
 
