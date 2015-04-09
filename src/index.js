@@ -153,6 +153,16 @@ $(document).ready(function() {
 
     $('.warrior-' + count + ' .warrior-info').append().html('Program <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
 
+    $('.warrior-' + count + ' h4 a')
+      .attr('href', '#warrior-' + count)
+      .attr('data-target', '#warrior-' + count)
+      .on('click', function(e) {
+        e.preventDefault();
+      });
+
+    $('.warrior-' + count + ' .panel-collapse')
+      .attr('id', 'warrior-' + count);
+
     for(var i = 0, code = warrior.getCode(); i < code.length; i++) {
       var current = code[i];
       var start = '';

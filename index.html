@@ -213,22 +213,37 @@ start: ADD.AB #     4, $     3
         </form>
       </div>
 
-      <div class="col-md-6 warriors">
+      <div class="col-md-6">
 
-        <div class="warrior-template hidden">
-          <div class="warrior-info"></div>
-          <table class="table small">
-            <thead>
-              <th></th>
-              <th>Opcode</th>
-              <th>Mode</th>
-              <th>A</th>
-              <th>Mode</th>
-              <th>B</th>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
+        <div class="panel-group warriors" id="accordion">
+
+          <div class="warrior-template hidden panel panel-default" id="panel2">
+            <div class="panel-heading">
+               <h4 class="panel-title">
+                  <a data-toggle="collapse" data-target="#Warrior"
+             href="#Warrior"><span class="warrior-info"></span></a>
+                </h4>
+            </div>
+            <div id="Warrior" class="panel-collapse collapse in">
+              <div class="panel-body">
+
+                <table class="table small">
+                  <thead>
+                    <th></th>
+                    <th>Opcode</th>
+                    <th>Mode</th>
+                    <th>A</th>
+                    <th>Mode</th>
+                    <th>B</th>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
       </div>
