@@ -88,6 +88,7 @@ var Parser = function (text) {
       case 'seq':
       case 'sne':
       case 'slt':
+      case 'spl':
       case 'ldp':
       case 'stp': {
         return (a && b);
