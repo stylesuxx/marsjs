@@ -253,8 +253,7 @@ var Parser = function (text) {
     for(var i = 0; i < text.length; i++) {
       var line = text[i];
 
-      var res = line.match(/^org /gi);
-      if(res) {
+      if(line.match(/^org /gi)) {
         var value = line.split(' ')[1];
         if(isNaN(value)) {
           this.startAlias = value;
@@ -265,7 +264,7 @@ var Parser = function (text) {
 
         continue;
       }
-      else if(line.indexOf('end') === 0) {
+      else if(line.match(/^end /gi)) {
         if(line.split(' ').length > 1) {
           var value = line.split(' ')[1];
           if(isNaN(value)) {
