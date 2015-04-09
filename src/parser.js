@@ -253,7 +253,8 @@ var Parser = function (text) {
     for(var i = 0; i < text.length; i++) {
       var line = text[i];
 
-      if(line.indexOf('org') === 0) {
+      var res = line.match(/^org /gi);
+      if(res) {
         var value = line.split(' ')[1];
         if(isNaN(value)) {
           this.startAlias = value;
