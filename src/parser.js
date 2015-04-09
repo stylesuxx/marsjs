@@ -156,7 +156,7 @@ var Parser = function (text) {
 
     // Get the opcode and potential modifier
     var opcode = line.split(' ')[0];
-    var modifier = null;
+    var modifier = '';
     if(opcode.indexOf('.') > -1) {
       modifier = opcode.split('.')[1];
       opcode = opcode.split('.')[0];
@@ -170,7 +170,7 @@ var Parser = function (text) {
       throw 'Invalid modifier: ' + modifier + ' (' + original + ')';
     }
 
-    line = line.substring(opcode.length).trim();
+    line = line.substring(opcode.length + modifier.length + 1).trim();
     var params = line.split(',');
 
     this.a = null;
@@ -180,14 +180,20 @@ var Parser = function (text) {
     // If no mode is set, it is always direct $
     if(params.length == 2) {
       if(this.modes.indexOf(params[0][0]) > -1) {
-        this.a = new Parameter(params[0][0], params[0].substring(1));
+        var mode = params[0][0];
+        var value = params[0].substring(1);
+
+        this.a = new Parameter(mode, value);
       }
       else {
         this.a = new Parameter('$', params[0]);
       }
 
       if(this.modes.indexOf(params[1][0]) > -1) {
-        this.b = new Parameter(params[1][0], params[1].substring(1));
+        var mode = params[1][0];
+        var value = params[1].substring(1);
+
+        this.b = new Parameter(mode, value);
       }
       else {
         this.b = new Parameter('$', params[1]);
@@ -196,7 +202,10 @@ var Parser = function (text) {
     // One parameter
     else if(params.length == 1 && params[0] !== '') {
       if(this.modes.indexOf(params[0][0]) > -1) {
-        this.a = new Parameter(params[0][0], params[0].substring(1));
+        var mode = params[0][0];
+        var value = params[0].substring(1);
+
+        this.a = new Parameter(mode, value);
       }
       else {
         this.a = new Parameter('$', params[0]);
@@ -367,6 +376,7 @@ var Parser = function (text) {
         var value = this.variables[key];
         line = line.split(key).join(value);
       }
+
       noVars[j] = line;
     }
 
@@ -604,12 +614,18 @@ var Parser = function (text) {
             mode_1 = parameter_1[0];
             parameter_1 = parameter_1.substring(1);
           }
+          else if(isNaN(parameter_1[0])) {
+            throw 'Invalid address mode: ' + line;
+          }
 
           var mode_2 = '';
           var parameter_2 = parameters[1].trim();
           if(this.modes.indexOf(parameter_2[0]) > -1) {
             mode_2 = parameter_2[0];
             parameter_2 = parameter_2.substring(1);
+          }
+          else if(isNaN(parameter_2[0])) {
+            throw 'Invalid address mode: ' + line;
           }
 
           if(isNaN(parameter_1)) {
@@ -629,6 +645,9 @@ var Parser = function (text) {
           if(this.modes.indexOf(parameters[0]) > -1) {
             mode = parameters[0];
             parameter = parameters.substring(1);
+          }
+          else if(isNaN(parameter[0])) {
+            throw 'Invalid address mode: ' + line;
           }
 
           if(isNaN(parameter)) {
