@@ -402,7 +402,6 @@ Field.prototype.move = function() {
     if(!that.currentWarrior.isAlive()) {
       that.warriorsLeft -= 1;
       console.log("Warrior died:", that.currentWarrior);
-      return;
     }
 
     if(that.warriorsLeft === 0) {
