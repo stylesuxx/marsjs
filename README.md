@@ -5,6 +5,38 @@ Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in J
 
 ## Features
 * debugging (single stepping through the code)
+* Parser supports labels, variables and for's
+* Available opcodes:
+ * add
+ * cmp
+ * div
+ * djn
+ * jmn
+ * jmp
+ * jmz
+ * mod
+ * mov
+ * mul
+ * slt
+ * spl
+ * sub
+* Available opcode modifiers:
+ * a
+ * b
+ * ab
+ * ba
+ * f
+ * x
+ * i
+* Available addressing modes:
+ * \# - immediate
+ * $ - direct
+ * \* - indirect using A-field
+ * @ - indirect using B-field
+ * \{ - predecrement indirect using A-field
+ * \} - postincrement indirect using A-field
+ * < - predecrement indirect using B-field
+ * \> - postincrement indirect using B-field
 
 ## Goals
 * be compatible with the current pmars implementation regarding parsing and opcodes
