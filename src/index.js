@@ -3,7 +3,7 @@ var Parser = require('./parser');
 
 $(document).ready(function() {
   var field = new Field(8000, 20000);
-  var colors = ['red', 'blue', 'green'];
+  var colors = ['red', 'blue', 'green', 'orange'];
 
   var debug = false;
 
@@ -140,7 +140,7 @@ $(document).ready(function() {
     var warrior = parser.getWarrior();
 
     var count = $('.warriors .warrior').length + 1;
-    var color = colors[count - 1];
+    var color = colors[(count - 1) % colors.length];
     warrior.setColor(color);
 
     $('.warrior-template')
