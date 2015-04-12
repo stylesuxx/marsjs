@@ -7,19 +7,19 @@ Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in J
 * debugging (single stepping through the code)
 * Parser supports labels, variables and for's
 * Available opcodes:
- * add
- * cmp
- * div
- * djn
- * jmn
- * jmp
- * jmz
- * mod
- * mov
- * mul
- * slt
- * spl
- * sub
+ * **add** - add A to B, store result in B
+ * **cmp** - Skip next instruction if A is equal to B
+ * **div** - divide B by A, store result in B if A > 0, else terminate
+ * **djn** - decrement B, if B is non-zero, transfer execution to A
+ * **jmn** - transfer execution to A if B is non-zero
+ * **jmp** - transfer execution to A
+ * **jmz** - transfer execution to A if B is zero
+ * **mod** - divide B by A, store remainder in B if A > 0, else terminate
+ * **mov** - move from A to B
+ * **mul** - multiply A by B, store result in B
+ * **slt** - skip next instruction if A is less than B
+ * **spl** - split off process to A
+ * **sub** - subtract A from B, store result in B
 * Available opcode modifiers:
  * **a** - Instructions read and write A-fields
  * **b** -  Instructions read and write B-fields
