@@ -21,22 +21,22 @@ Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in J
  * spl
  * sub
 * Available opcode modifiers:
- * a
- * b
- * ab
- * ba
- * f
- * x
- * i
+ * **a** - Instructions read and write A-fields
+ * **b** -  Instructions read and write B-fields
+ * **ab** - Instructions read the A-field of the A-instruction and the B-field of the B-instruction and write to B-fields
+ * **ba** - Instructions read the B-field of the A-instruction and the A-field of the B-instruction and write to A-fields
+ * **f** - Instructions read both A- and B-fields of the A- and B-instruction and write to both A- and B-fields (A to A and B to B)
+ * **x** - Instructions read both A- and B-fields of the the A- and  B-instruction and write to both A- and B-fields exchanging fields (A to B and B to A)
+ * **i** - Instructions read and write entire instructions
 * Available addressing modes:
- * \# - immediate
- * $ - direct
- * \* - indirect using A-field
- * @ - indirect using B-field
- * \{ - predecrement indirect using A-field
- * \} - postincrement indirect using A-field
- * < - predecrement indirect using B-field
- * \> - postincrement indirect using B-field
+ * **\#** - immediate
+ * **$** - direct
+ * **\*** - indirect using A-field
+ * **@** - indirect using B-field
+ * **\{** - predecrement indirect using A-field
+ * **\}** - postincrement indirect using A-field
+ * **<** - predecrement indirect using B-field
+ * **\>** - postincrement indirect using B-field
 
 ## Goals
 * be compatible with the current pmars implementation regarding parsing and opcodes
