@@ -41,6 +41,9 @@ var Field = function(coreSize, maxCycles) {
 
   this.touched = [];
   this.updateCallback = null;
+  this.winCallback = null;
+  this.maxCyclesCallback = null;
+  this.suicideCallback = null;
 
   // Trampoline to keep the stack flat
   this.trampoline = function(fn) {
@@ -364,7 +367,7 @@ Field.prototype.addWarrior = function(warrior) {
 /**
  * Triggers the start of the simulation by executing the first move.
  */
-Field.prototype.start = function(updateCallback) {
+Field.prototype.start = function(updateCallback, winCallback, maxCyclesCallback, suicideCallback) {
   this.updateCallback = updateCallback;
   this.warriorsLeft = this.warriors.length;
   this.currentWarrior = this.warriors[0];
@@ -390,7 +393,8 @@ Field.prototype.move = function() {
 
   return function() {
     if(that.currentCycle == that.maxCycles) {
-      console.log("max cycles reached");
+      if(that.maxCyclesCallback) that.maxCyclesCallback(that.maxCycles);
+
       return;
     }
 
@@ -404,12 +408,22 @@ Field.prototype.move = function() {
       console.log("Warrior died:", that.currentWarrior);
     }
 
+    // Single warrior suicided
     if(that.warriorsLeft === 0) {
-      console.log("Single warrior died");
+      if(that.suicideCallback) that.suicideCallback(that.currentCycle);
+
       return;
     }
+    // Last warrior
     else if (that.warriorsLeft == 1 && that.warriors.length > 1) {
-      console.log("Only one warrior is left, he is the winner");
+      if(that.winCallback) {
+        for(var i = length; i < that.warrior.length; i++) {
+          if(that.warriors[i].isAlive()) {
+            that.winCallback(that.warriors[i]);
+          }
+        }
+      }
+
       return;
     }
 
