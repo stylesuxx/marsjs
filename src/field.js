@@ -32,6 +32,13 @@ var Field = function(coreSize, maxCycles) {
   this.currentWarriorIndex = 0;
   this.warriorsLeft = 0;
 
+  this.availablePositions = [
+    {
+      start: 0,
+      end: this.coreSize - 1
+    }
+  ];
+
   this.touched = [];
   this.updateCallback = null;
 
@@ -263,6 +270,10 @@ var Field = function(coreSize, maxCycles) {
     }
   };
 
+  this.getRandomInt = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
   this.initializField();
 };
 
@@ -282,11 +293,57 @@ Field.prototype.getField = function() {
  * false.
  */
 Field.prototype.addWarrior = function(warrior) {
-  this.warriors.push(warrior);
+  var position = 0;
 
-  // TODO: the first warrior may be placed at absolute 0, all others need some
-  //       padding to the first but should be placed
-  var position = (this.coreSize / this.warriors.length) % 8000;
+  // First warrior at position 0
+  if(this.availablePositions.length === 1 &&
+     this.availablePositions[0].start === 0) {
+    position = 0;
+
+    this.availablePositions[0].start = warrior.getLength();
+  }
+  // all but the first warrior
+  else {
+    var possible = [];
+    var length = warrior.getLength();
+
+    // Check in which spot the warrior fits
+    for(var item in this.availablePositions) {
+      var current = this.availablePositions[item];
+      var space = current.end - current.start + 1;
+
+      if(space >= length) {
+        possible.push(current);
+      }
+    }
+
+    // No space for this warrior
+    if(possible.length < 1) {
+      return false;
+    }
+
+    // Choose a random range from the available positions
+    var i = this.getRandomInt(0, possible.length - 1);
+    var chosen = possible[i];
+
+    var min = chosen.start;
+    var max = chosen.end - length + 1;
+
+    // Choose a random starting point in the previously chosen range
+    var position = this.getRandomInt(min, max);
+
+    // Adjust the available possible ranges
+    var temp = chosen.end;
+    chosen.end = position - 1;
+
+    var pos = {
+      start: position + length,
+      end: temp
+    };
+
+    this.availablePositions.push(pos);
+  }
+
   warrior.pushPC(position + warrior.getStart());
 
   var code = warrior.getCode();
@@ -294,9 +351,12 @@ Field.prototype.addWarrior = function(warrior) {
     var current = position + i;
     var cell = this.field[current];
     var instruction = code[i];
+
     cell.setInstruction(instruction);
     cell.setLastUser(warrior);
   }
+
+  this.warriors.push(warrior);
 
   return true;
 };
