@@ -44,6 +44,7 @@ var Field = function(coreSize, maxCycles) {
   this.winCallback = null;
   this.maxCyclesCallback = null;
   this.suicideCallback = null;
+  that.warriorDiedCallback = null;
 
   // Trampoline to keep the stack flat
   this.trampoline = function(fn) {
@@ -367,8 +368,12 @@ Field.prototype.addWarrior = function(warrior) {
 /**
  * Triggers the start of the simulation by executing the first move.
  */
-Field.prototype.start = function(updateCallback, winCallback, maxCyclesCallback, suicideCallback) {
+Field.prototype.start = function(updateCallback, winCallback, maxCyclesCallback, suicideCallback, warriorDiedCallback) {
   this.updateCallback = updateCallback;
+  this.maxCyclesCallback = maxCyclesCallback;
+  this.suicideCallback = suicideCallback;
+  this.warriorDiedCallback = warriorDiedCallback;
+
   this.warriorsLeft = this.warriors.length;
   this.currentWarrior = this.warriors[0];
 
@@ -405,7 +410,8 @@ Field.prototype.move = function() {
 
     if(!that.currentWarrior.isAlive()) {
       that.warriorsLeft -= 1;
-      console.log("Warrior died:", that.currentWarrior);
+
+      if(that.warriorDiedCallback) that.warriorDiedCallback(that.currentWarrior, that.currentCycle);
     }
 
     // Single warrior suicided
