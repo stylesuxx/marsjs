@@ -262,6 +262,10 @@ var Field = function(coreSize, maxCycles) {
         this.op.spl(this, pc, modifier, a_adr, b_adr);
       } break;
 
+      case "nop": {
+        this.currentWarrior.pushPC(pc + 1);
+      } break;
+
       default: {
         console.log(op, 'not implemented');
       }
