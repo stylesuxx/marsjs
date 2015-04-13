@@ -621,7 +621,9 @@ var Parser = function (text) {
             mode_1 = parameter_1[0];
             parameter_1 = parameter_1.substring(1);
           }
-          else if(isNaN(parameter_1[0])) {
+          else if(isNaN(parameter_1[0]) &&
+                  parameter_1[0] != "(" &&
+                  parameter_1[0] != "-") {
             throw 'Invalid address mode: ' + line;
           }
 
@@ -631,7 +633,9 @@ var Parser = function (text) {
             mode_2 = parameter_2[0];
             parameter_2 = parameter_2.substring(1);
           }
-          else if(isNaN(parameter_2[0])) {
+          else if(isNaN(parameter_2[0]) &&
+                  parameter_2[0] != "(" &&
+                  parameter_2[0] != "-") {
             throw 'Invalid address mode: ' + line;
           }
 
@@ -653,7 +657,9 @@ var Parser = function (text) {
             mode = parameters[0];
             parameter = parameters.substring(1);
           }
-          else if(isNaN(parameter[0])) {
+          else if(isNaN(parameter[0]) &&
+                  parameter[0] != "(" &&
+                  parameter[0] != "-") {
             throw 'Invalid address mode: ' + line;
           }
 
