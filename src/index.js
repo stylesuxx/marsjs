@@ -7,6 +7,26 @@ $(document).ready(function() {
 
   var debug = false;
 
+  var suicideCallback = function(warrior, cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>Suicide</h3><h4>Warrior killed himself.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var winCallback = function(warrior, cycle) {
+    console.log("Warrior", warrior, "won in cycle", cycle);
+  };
+
+  var maxCyclesCallback = function(cycle) {
+    console.log("Max cycle reached", cycle);
+  };
+
+  var dieCallback = function(warrior, cycle, pc) {
+    console.log("Warrior", warrior, "died in cycle", cycle, "at", pc);
+  };
+
   var updateField = function(touched, currentWarrior, callback) {
     var cells = field.getField();
     for(var i = 0; i < touched.length; i++) {
@@ -76,7 +96,7 @@ $(document).ready(function() {
       .removeClass('hidden');
 
 
-    field.start(updateField);
+    field.start(updateField, winCallback, maxCyclesCallback, suicideCallback, dieCallback);
   });
 
   $('button.pause').click(function(e) {
@@ -121,7 +141,7 @@ $(document).ready(function() {
     $('button.start-simulation').hide();
     $('button.step-simulation').hide();
 
-    field.start(updateField);
+    field.start(updateField, winCallback, maxCyclesCallback, suicideCallback, dieCallback);
   });
 
   $('button.start-simulation-no-visuals').click(function(e) {
