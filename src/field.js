@@ -25,6 +25,7 @@ var Field = function(coreSize, maxCycles) {
   this.op.slt = require('./opcodes/slt');
   this.op.spl = require('./opcodes/spl');
   this.op.sub = require('./opcodes/sub');
+  this.op.sne = require('./opcodes/sne');
 
   this.field = [];
   this.warriors = [];
@@ -253,6 +254,10 @@ var Field = function(coreSize, maxCycles) {
       case "seq":
       case "cmp": {
         this.op.cmp(this, pc, modifier, a_adr, b_adr);
+      } break;
+
+      case "sne": {
+        this.op.sne(this, pc, modifier, a_adr, b_adr);
       } break;
 
       case "slt": {
