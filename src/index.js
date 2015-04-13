@@ -16,7 +16,11 @@ $(document).ready(function() {
   };
 
   var winCallback = function(warrior, cycle) {
-    console.log("Warrior", warrior, "won in cycle", cycle);
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>' + warrior.getName() + ' won</h3><h4>Warrior by ' + warrior.getAuthor() +' won in cycle ' + cycle + '.</h4></div>');
+
+    $(".controls").hide();
   };
 
   var maxCyclesCallback = function(cycle) {

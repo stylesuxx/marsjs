@@ -370,6 +370,7 @@ Field.prototype.addWarrior = function(warrior) {
  */
 Field.prototype.start = function(updateCallback, winCallback, maxCyclesCallback, suicideCallback, warriorDiedCallback) {
   this.updateCallback = updateCallback;
+  this.winCallback = winCallback;
   this.maxCyclesCallback = maxCyclesCallback;
   this.suicideCallback = suicideCallback;
   this.warriorDiedCallback = warriorDiedCallback;
@@ -420,12 +421,12 @@ Field.prototype.move = function() {
 
       return;
     }
-    // Last warrior
-    else if (that.warriorsLeft == 1 && that.warriors.length > 1) {
+    // Last warrior alive
+    else if(that.warriorsLeft === 1 && that.warriors.length > 1) {
       if(that.winCallback) {
-        for(var i = length; i < that.warrior.length; i++) {
+        for(var i = 0; i < that.warriors.length; i++) {
           if(that.warriors[i].isAlive()) {
-            that.winCallback(that.warriors[i]);
+            that.winCallback(that.warriors[i], that.currentCycle);
           }
         }
       }
