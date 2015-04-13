@@ -1,5 +1,5 @@
 # marsjs
-Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in JavaScript and easily accessible through the browser.
+Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in JavaScript and easily accessible through the browser implementing the extended ICWS'94 draft.
 
 **Live Demo**: http://stylesuxx.github.io/marsjs/
 
@@ -42,7 +42,14 @@ Core war **MARS** virtual computer (Memory Array Redcode Simulator) written in J
  * **\>** - postincrement indirect using B-field
 
 ## Goals
-* be compatible with the current pmars implementation regarding parsing and opcodes
+* be compatible with the extended ICWS'94 draft
+
+## TODO's
+* implement private variable space, LDP and STP opcodes
+* Asserts for coresize, max length, max cycles, max processes, min distance
+* Functionality for max processes
+* Functionality for min distance
+* Let the user set the cores properties
 
 ## Building & Running
 Clone the repository, install all needed modules and build the *app.js* file
