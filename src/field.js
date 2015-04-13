@@ -44,7 +44,7 @@ var Field = function(coreSize, maxCycles) {
   this.winCallback = null;
   this.maxCyclesCallback = null;
   this.suicideCallback = null;
-  that.warriorDiedCallback = null;
+  this.warriorDiedCallback = null;
 
   // Trampoline to keep the stack flat
   this.trampoline = function(fn) {
@@ -196,7 +196,7 @@ var Field = function(coreSize, maxCycles) {
 
     switch(op) {
       case "dat": {
-        console.log("DAT executed at", pc);
+        // Player dies
       } break;
 
       case "mov": {
@@ -411,12 +411,12 @@ Field.prototype.move = function() {
     if(!that.currentWarrior.isAlive()) {
       that.warriorsLeft -= 1;
 
-      if(that.warriorDiedCallback) that.warriorDiedCallback(that.currentWarrior, that.currentCycle);
+      if(that.warriorDiedCallback) that.warriorDiedCallback(that.currentWarrior, that.currentCycle, pc);
     }
 
     // Single warrior suicided
     if(that.warriorsLeft === 0) {
-      if(that.suicideCallback) that.suicideCallback(that.currentCycle);
+      if(that.suicideCallback) that.suicideCallback(that.currentWarrior, that.currentCycle);
 
       return;
     }
