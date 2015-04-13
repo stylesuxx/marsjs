@@ -22,3 +22,25 @@
 .cell[action=write] {
   opacity: 0.6;
 }
+
+.row {
+  position: relative;
+}
+
+.game-end {
+  position: absolute!important;
+  top: 0px;
+  left: 0px;
+  width: 100%!important;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.75);
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.game-end .message {
+  margin: auto;
+}
