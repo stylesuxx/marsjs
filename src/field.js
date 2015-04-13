@@ -250,6 +250,7 @@ var Field = function(coreSize, maxCycles) {
         this.op.djn(this, pc, modifier, a_adr, b_adr);
       } break;
 
+      case "seq":
       case "cmp": {
         this.op.cmp(this, pc, modifier, a_adr, b_adr);
       } break;
