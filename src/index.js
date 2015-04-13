@@ -179,7 +179,7 @@ $(document).ready(function() {
       .addClass('warrior')
       .addClass('warrior-' + count);
 
-    $('.warrior-' + count + ' .warrior-info').append().html('Program <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
+    $('.warrior-' + count + ' .warrior-info').append().html('Warrior <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
 
     $('.warrior-' + count + ' h4 a')
       .attr('href', '#warrior-' + count)
