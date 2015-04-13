@@ -61,6 +61,7 @@ var Field = function(coreSize, maxCycles) {
   this.op.slt = require('./opcodes/slt');
   this.op.spl = require('./opcodes/spl');
   this.op.sub = require('./opcodes/sub');
+  this.op.sne = require('./opcodes/sne');
 
   this.field = [];
   this.warriors = [];
@@ -68,8 +69,19 @@ var Field = function(coreSize, maxCycles) {
   this.currentWarriorIndex = 0;
   this.warriorsLeft = 0;
 
+  this.availablePositions = [
+    {
+      start: 0,
+      end: this.coreSize - 1
+    }
+  ];
+
   this.touched = [];
   this.updateCallback = null;
+  this.winCallback = null;
+  this.maxCyclesCallback = null;
+  this.suicideCallback = null;
+  this.warriorDiedCallback = null;
 
   // Trampoline to keep the stack flat
   this.trampoline = function(fn) {
@@ -221,7 +233,7 @@ var Field = function(coreSize, maxCycles) {
 
     switch(op) {
       case "dat": {
-        console.log("DAT executed at", pc);
+        // Player dies
       } break;
 
       case "mov": {
@@ -275,8 +287,13 @@ var Field = function(coreSize, maxCycles) {
         this.op.djn(this, pc, modifier, a_adr, b_adr);
       } break;
 
+      case "seq":
       case "cmp": {
         this.op.cmp(this, pc, modifier, a_adr, b_adr);
+      } break;
+
+      case "sne": {
+        this.op.sne(this, pc, modifier, a_adr, b_adr);
       } break;
 
       case "slt": {
@@ -285,6 +302,10 @@ var Field = function(coreSize, maxCycles) {
 
       case "spl": {
         this.op.spl(this, pc, modifier, a_adr, b_adr);
+      } break;
+
+      case "nop": {
+        this.currentWarrior.pushPC(pc + 1);
       } break;
 
       default: {
@@ -297,6 +318,10 @@ var Field = function(coreSize, maxCycles) {
       this.touched.push(a_adr);
       this.touched.push(b_adr);
     }
+  };
+
+  this.getRandomInt = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
   this.initializField();
@@ -318,11 +343,57 @@ Field.prototype.getField = function() {
  * false.
  */
 Field.prototype.addWarrior = function(warrior) {
-  this.warriors.push(warrior);
+  var position = 0;
 
-  // TODO: the first warrior may be placed at absolute 0, all others need some
-  //       padding to the first but should be placed
-  var position = (this.coreSize / this.warriors.length) % 8000;
+  // First warrior at position 0
+  if(this.availablePositions.length === 1 &&
+     this.availablePositions[0].start === 0) {
+    position = 0;
+
+    this.availablePositions[0].start = warrior.getLength();
+  }
+  // all but the first warrior
+  else {
+    var possible = [];
+    var length = warrior.getLength();
+
+    // Check in which spot the warrior fits
+    for(var item in this.availablePositions) {
+      var current = this.availablePositions[item];
+      var space = current.end - current.start + 1;
+
+      if(space >= length) {
+        possible.push(current);
+      }
+    }
+
+    // No space for this warrior
+    if(possible.length < 1) {
+      return false;
+    }
+
+    // Choose a random range from the available positions
+    var i = this.getRandomInt(0, possible.length - 1);
+    var chosen = possible[i];
+
+    var min = chosen.start;
+    var max = chosen.end - length + 1;
+
+    // Choose a random starting point in the previously chosen range
+    var position = this.getRandomInt(min, max);
+
+    // Adjust the available possible ranges
+    var temp = chosen.end;
+    chosen.end = position - 1;
+
+    var pos = {
+      start: position + length,
+      end: temp
+    };
+
+    this.availablePositions.push(pos);
+  }
+
   warrior.pushPC(position + warrior.getStart());
 
   var code = warrior.getCode();
@@ -330,9 +401,12 @@ Field.prototype.addWarrior = function(warrior) {
     var current = position + i;
     var cell = this.field[current];
     var instruction = code[i];
+
     cell.setInstruction(instruction);
     cell.setLastUser(warrior);
   }
+
+  this.warriors.push(warrior);
 
   return true;
 };
@@ -340,8 +414,13 @@ Field.prototype.addWarrior = function(warrior) {
 /**
  * Triggers the start of the simulation by executing the first move.
  */
-Field.prototype.start = function(updateCallback) {
+Field.prototype.start = function(updateCallback, winCallback, maxCyclesCallback, suicideCallback, warriorDiedCallback) {
   this.updateCallback = updateCallback;
+  this.winCallback = winCallback;
+  this.maxCyclesCallback = maxCyclesCallback;
+  this.suicideCallback = suicideCallback;
+  this.warriorDiedCallback = warriorDiedCallback;
+
   this.warriorsLeft = this.warriors.length;
   this.currentWarrior = this.warriors[0];
 
@@ -366,7 +445,8 @@ Field.prototype.move = function() {
 
   return function() {
     if(that.currentCycle == that.maxCycles) {
-      console.log("max cycles reached");
+      if(that.maxCyclesCallback) that.maxCyclesCallback(that.maxCycles);
+
       return;
     }
 
@@ -377,16 +457,26 @@ Field.prototype.move = function() {
 
     if(!that.currentWarrior.isAlive()) {
       that.warriorsLeft -= 1;
-      console.log("Warrior died:", that.currentWarrior);
-      return;
+
+      if(that.warriorDiedCallback) that.warriorDiedCallback(that.currentWarrior, that.currentCycle, pc);
     }
 
+    // Single warrior suicided
     if(that.warriorsLeft === 0) {
-      console.log("Single warrior died");
+      if(that.suicideCallback) that.suicideCallback(that.currentWarrior, that.currentCycle);
+
       return;
     }
-    else if (that.warriorsLeft == 1 && that.warriors.length > 1) {
-      console.log("Only one warrior is left, he is the winner");
+    // Last warrior alive
+    else if(that.warriorsLeft === 1 && that.warriors.length > 1) {
+      if(that.winCallback) {
+        for(var i = 0; i < that.warriors.length; i++) {
+          if(that.warriors[i].isAlive()) {
+            that.winCallback(that.warriors[i], that.currentCycle);
+          }
+        }
+      }
+
       return;
     }
 
@@ -413,15 +503,43 @@ Field.prototype.move = function() {
 
 module.exports = Field;
 
-},{"./cell":1,"./instruction":4,"./opcodes/add":5,"./opcodes/cmp":6,"./opcodes/div":7,"./opcodes/djn":8,"./opcodes/jmn":9,"./opcodes/jmp":10,"./opcodes/jmz":11,"./opcodes/mod":12,"./opcodes/mov":13,"./opcodes/mul":14,"./opcodes/slt":15,"./opcodes/spl":16,"./opcodes/sub":17,"./parameter":18}],3:[function(require,module,exports){
+},{"./cell":1,"./instruction":4,"./opcodes/add":5,"./opcodes/cmp":6,"./opcodes/div":7,"./opcodes/djn":8,"./opcodes/jmn":9,"./opcodes/jmp":10,"./opcodes/jmz":11,"./opcodes/mod":12,"./opcodes/mov":13,"./opcodes/mul":14,"./opcodes/slt":15,"./opcodes/sne":16,"./opcodes/spl":17,"./opcodes/sub":18,"./parameter":19}],3:[function(require,module,exports){
 var Field = require('./field');
 var Parser = require('./parser');
 
 $(document).ready(function() {
-  var field = new Field(8000, 20000);
-  var colors = ['red', 'blue', 'green'];
+  var field = new Field(8000, 80000);
+  var colors = ['red', 'blue', 'green', 'orange'];
 
   var debug = false;
+
+  var suicideCallback = function(warrior, cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>Suicide</h3><h4>Warrior killed himself.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var winCallback = function(warrior, cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>' + warrior.getName() + ' won</h3><h4>Warrior by ' + warrior.getAuthor() +' won in cycle ' + cycle + '.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var maxCyclesCallback = function(cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>Max cycles reached</h3><h4>Simulation ended after ' + cycle + ' cycles without a winner.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var dieCallback = function(warrior, cycle, pc) {
+    console.log("Warrior", warrior, "died in cycle", cycle, "at", pc);
+  };
 
   var updateField = function(touched, currentWarrior, callback) {
     var cells = field.getField();
@@ -492,7 +610,7 @@ $(document).ready(function() {
       .removeClass('hidden');
 
 
-    field.start(updateField);
+    field.start(updateField, winCallback, maxCyclesCallback, suicideCallback, dieCallback);
   });
 
   $('button.pause').click(function(e) {
@@ -537,7 +655,7 @@ $(document).ready(function() {
     $('button.start-simulation').hide();
     $('button.step-simulation').hide();
 
-    field.start(updateField);
+    field.start(updateField, winCallback, maxCyclesCallback, suicideCallback, dieCallback);
   });
 
   $('button.start-simulation-no-visuals').click(function(e) {
@@ -556,7 +674,7 @@ $(document).ready(function() {
     var warrior = parser.getWarrior();
 
     var count = $('.warriors .warrior').length + 1;
-    var color = colors[count - 1];
+    var color = colors[(count - 1) % colors.length];
     warrior.setColor(color);
 
     $('.warrior-template')
@@ -567,7 +685,17 @@ $(document).ready(function() {
       .addClass('warrior')
       .addClass('warrior-' + count);
 
-    $('.warrior-' + count + ' .warrior-info').append().html('Program <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
+    $('.warrior-' + count + ' .warrior-info').append().html('Warrior <strong>' + warrior.getName() + '</strong> (length ' + warrior.getLength() + ') by <strong>' + warrior.getAuthor() + '</strong>');
+
+    $('.warrior-' + count + ' h4 a')
+      .attr('href', '#warrior-' + count)
+      .attr('data-target', '#warrior-' + count)
+      .on('click', function(e) {
+        e.preventDefault();
+      });
+
+    $('.warrior-' + count + ' .panel-collapse')
+      .attr('id', 'warrior-' + count);
 
     for(var i = 0, code = warrior.getCode(); i < code.length; i++) {
       var current = code[i];
@@ -611,7 +739,7 @@ $(document).ready(function() {
     $('.controls').removeClass('hidden');
   });
 });
-},{"./field":2,"./parser":19}],4:[function(require,module,exports){
+},{"./field":2,"./parser":20}],4:[function(require,module,exports){
 var Instruction = function (opcode, modifier, A, B) {
   this.opcode = opcode;
   this.modifier = modifier;
@@ -1671,6 +1799,158 @@ var slt = function(that, pc, modifier, a_adr, b_adr) {
 module.exports = slt;
 
 },{}],16:[function(require,module,exports){
+var sne = function(that, pc, modifier, a_adr, b_adr) {
+  switch(modifier) {
+    /**
+     * A-number at A address != A-number at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "a": {
+      var address = pc + 1;
+      var a_nr_a = that.getANumber(a_adr);
+      var a_nr_b = that.getANumber(b_adr);
+
+      if(a_nr_a != a_nr_b) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    /**
+     * B-number at A address != B-number at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "b": {
+      var address = pc + 1;
+      var b_nr_a = that.getBNumber(a_adr);
+      var b_nr_b = that.getBNumber(b_adr);
+
+      if(b_nr_a != b_nr_b) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    /**
+     * A-number at A address != B-number at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "ab": {
+      var address = pc + 1;
+      var a_nr_a = that.getANumber(a_adr);
+      var b_nr_b = that.getBNumber(b_adr);
+
+      if(a_nr_a != b_nr_b) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    /**
+     * B-number at A address != A-number at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "ba": {
+      var address = pc + 1;
+      var b_nr_a = that.getBNumber(a_adr);
+      var a_nr_b = that.getANumber(b_adr);
+
+      if(b_nr_a != a_nr_b) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    /**
+     * A-number at A address != A-number at B address AND
+     * B-number at A address != B-number at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "f": {
+      var address = pc + 1;
+
+      var a_nr_a = that.getANumber(a_adr);
+      var b_nr_a = that.getBNumber(a_adr);
+
+      var a_nr_b = that.getANumber(b_adr);
+      var b_nr_b = that.getBNumber(b_adr);
+
+      if((a_nr_a != a_nr_b) || (b_nr_a != b_nr_b)) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    /**
+     * A-number at A address != B-number at B address AND
+     * B-number at A address != A-number at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "x": {
+      var address = pc + 1;
+
+      var a_nr_a = that.getANumber(a_adr);
+      var b_nr_a = that.getBNumber(a_adr);
+
+      var a_nr_b = that.getANumber(b_adr);
+      var b_nr_b = that.getBNumber(b_adr);
+
+      if((a_nr_a != b_nr_b) || (b_nr_a != a_nr_b)) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    /**
+     * Instruction at A address != Instruction at B address: queue pc + 2
+     * else: queue pc + 1
+     */
+    case "i": {
+      var address = pc + 1;
+      var a = that.field[a_adr].getInstruction();
+      var b = that.field[b_adr].getInstruction();
+
+      if((a.getOpcode() != b.getOpcode()) ||
+         (a.getModifier() != b.getModifier()) ||
+         (a.getA().getMode() != b.getA().getMode()) ||
+         (a.getA().getValue() != b.getA().getValue()) ||
+         (a.getB().getMode() != b.getB().getMode()) ||
+         (a.getB().getValue() != b.getB().getValue())
+        ) {
+        address = pc + 2;
+      }
+      address = that.sanitizeAddress(address);
+
+      that.currentWarrior.pushPC(address);
+    } break;
+
+    // Unknown modifier
+    default: {
+      console.log("SNE - unknown modifier:", modifier);
+    }
+  }
+
+  if(that.updateCallback) {
+    that.field[a_adr].setLastAction("read");
+    that.field[b_adr].setLastAction("read");
+  }
+};
+
+module.exports = sne;
+
+},{}],17:[function(require,module,exports){
 var spl = function(that, pc, modifier, a_adr, b_adr) {
   switch(modifier) {
     case "a":
@@ -1692,7 +1972,7 @@ var spl = function(that, pc, modifier, a_adr, b_adr) {
 
 module.exports = spl;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var sub = function(that, pc, modifier, a_adr, b_adr) {
   switch(modifier) {
     /**
@@ -1789,7 +2069,7 @@ var sub = function(that, pc, modifier, a_adr, b_adr) {
 
 module.exports = sub;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var Parameter = function (mode, value) {
   this.mode = mode;
   this.value = value;
@@ -1817,7 +2097,7 @@ Parameter.prototype.clone = function() {
 
 module.exports = Parameter;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var Warrior = require('./warrior');
 var Instruction = require('./instruction');
 var Parameter = require('./parameter');
@@ -1890,6 +2170,11 @@ var Parser = function (text) {
 
   this.isValidParameters = function(opcode, a, b) {
     switch(opcode) {
+      case 'jmp':
+      case 'dat': {
+        return (a);
+      } break;
+
       case 'mov':
       case 'add':
       case 'sub':
@@ -1903,12 +2188,14 @@ var Parser = function (text) {
       case 'seq':
       case 'sne':
       case 'slt':
+      case 'spl':
       case 'ldp':
       case 'stp': {
         return (a && b);
       } break;
+
       default: {
-        return (a);
+        return false;
       }
     }
   };
@@ -1972,21 +2259,25 @@ var Parser = function (text) {
 
   this.parseLine = function(line) {
     var instruction = null;
-    var original = line;
+    var original = line.substr(0);
 
     // Get the opcode and potential modifier
     var opcode = line.split(' ')[0];
-    line = line.substring(opcode.length).trim();
-    var modifier = null;
+    var modifier = '';
     if(opcode.indexOf('.') > -1) {
       modifier = opcode.split('.')[1];
       opcode = opcode.split('.')[0];
+
+      if(this.modifiers.indexOf(modifier) < 0) {
+        throw 'Invalid modifier: ' + modifier + ' (' + original + ')';
+      }
     }
 
     if(!this.isValidOpcode(opcode)) {
-      throw 'Invalid opcode: ' + opcode + ' (' + line + ')';
+      throw 'Invalid opcode: ' + opcode + ' (' + original + ')';
     }
 
+    line = line.substring(opcode.length + modifier.length + 1).trim();
     var params = line.split(',');
 
     this.a = null;
@@ -1996,14 +2287,20 @@ var Parser = function (text) {
     // If no mode is set, it is always direct $
     if(params.length == 2) {
       if(this.modes.indexOf(params[0][0]) > -1) {
-        this.a = new Parameter(params[0][0], params[0].substring(1));
+        var mode = params[0][0];
+        var value = params[0].substring(1);
+
+        this.a = new Parameter(mode, value);
       }
       else {
         this.a = new Parameter('$', params[0]);
       }
 
       if(this.modes.indexOf(params[1][0]) > -1) {
-        this.b = new Parameter(params[1][0], params[1].substring(1));
+        var mode = params[1][0];
+        var value = params[1].substring(1);
+
+        this.b = new Parameter(mode, value);
       }
       else {
         this.b = new Parameter('$', params[1]);
@@ -2012,7 +2309,10 @@ var Parser = function (text) {
     // One parameter
     else if(params.length == 1 && params[0] !== '') {
       if(this.modes.indexOf(params[0][0]) > -1) {
-        this.a = new Parameter(params[0][0], params[0].substring(1));
+        var mode = params[0][0];
+        var value = params[0].substring(1);
+
+        this.a = new Parameter(mode, value);
       }
       else {
         this.a = new Parameter('$', params[0]);
@@ -2073,7 +2373,7 @@ var Parser = function (text) {
     for(var i = 0; i < text.length; i++) {
       var line = text[i];
 
-      if(line.indexOf('org') === 0) {
+      if(line.match(/^org /gi)) {
         var value = line.split(' ')[1];
         if(isNaN(value)) {
           this.startAlias = value;
@@ -2084,7 +2384,7 @@ var Parser = function (text) {
 
         continue;
       }
-      else if(line.indexOf('end') === 0) {
+      else if(line.match(/^end /gi)) {
         if(line.split(' ').length > 1) {
           var value = line.split(' ')[1];
           if(isNaN(value)) {
@@ -2183,6 +2483,7 @@ var Parser = function (text) {
         var value = this.variables[key];
         line = line.split(key).join(value);
       }
+
       noVars[j] = line;
     }
 
@@ -2223,9 +2524,9 @@ var Parser = function (text) {
         word = word.split('.')[0].trim();
       }
       word = word.toLowerCase();
-      if((index = this.opcodes.indexOf(word)) < 0) {
+      if(this.opcodes.indexOf(word) < 0) {
         var label = line.split(' ')[0].trim();
-        line = line.substring(index + label.length).trim();
+        line = line.substring(label.length).trim();
         this.labels[label] = i;
         stripped[i] = line;
 
@@ -2420,12 +2721,22 @@ var Parser = function (text) {
             mode_1 = parameter_1[0];
             parameter_1 = parameter_1.substring(1);
           }
+          else if(isNaN(parameter_1[0]) &&
+                  parameter_1[0] != "(" &&
+                  parameter_1[0] != "-") {
+            throw 'Invalid address mode: ' + line;
+          }
 
           var mode_2 = '';
           var parameter_2 = parameters[1].trim();
           if(this.modes.indexOf(parameter_2[0]) > -1) {
             mode_2 = parameter_2[0];
             parameter_2 = parameter_2.substring(1);
+          }
+          else if(isNaN(parameter_2[0]) &&
+                  parameter_2[0] != "(" &&
+                  parameter_2[0] != "-") {
+            throw 'Invalid address mode: ' + line;
           }
 
           if(isNaN(parameter_1)) {
@@ -2445,6 +2756,11 @@ var Parser = function (text) {
           if(this.modes.indexOf(parameters[0]) > -1) {
             mode = parameters[0];
             parameter = parameters.substring(1);
+          }
+          else if(isNaN(parameter[0]) &&
+                  parameter[0] != "(" &&
+                  parameter[0] != "-") {
+            throw 'Invalid address mode: ' + line;
           }
 
           if(isNaN(parameter)) {
@@ -2517,7 +2833,7 @@ Parser.prototype.getWarrior = function () {
 
 module.exports = Parser;
 
-},{"./instruction":4,"./parameter":18,"./warrior":20}],20:[function(require,module,exports){
+},{"./instruction":4,"./parameter":19,"./warrior":21}],21:[function(require,module,exports){
 var Warrior = function(code, start, author, name) {
   this.code = code;
   this.start = start;
