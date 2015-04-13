@@ -2,10 +2,38 @@ var Field = require('./field');
 var Parser = require('./parser');
 
 $(document).ready(function() {
-  var field = new Field(8000, 20000);
+  var field = new Field(8000, 80000);
   var colors = ['red', 'blue', 'green', 'orange'];
 
   var debug = false;
+
+  var suicideCallback = function(warrior, cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>Suicide</h3><h4>Warrior killed himself.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var winCallback = function(warrior, cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>' + warrior.getName() + ' won</h3><h4>Warrior by ' + warrior.getAuthor() +' won in cycle ' + cycle + '.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var maxCyclesCallback = function(cycle) {
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>Max cycles reached</h3><h4>Simulation ended after ' + cycle + ' cycles without a winner.</h4></div>');
+
+    $(".controls").hide();
+  };
+
+  var dieCallback = function(warrior, cycle, pc) {
+    console.log("Warrior", warrior, "died in cycle", cycle, "at", pc);
+  };
 
   var updateField = function(touched, currentWarrior, callback) {
     var cells = field.getField();
@@ -76,7 +104,7 @@ $(document).ready(function() {
       .removeClass('hidden');
 
 
-    field.start(updateField);
+    field.start(updateField, winCallback, maxCyclesCallback, suicideCallback, dieCallback);
   });
 
   $('button.pause').click(function(e) {
@@ -121,7 +149,7 @@ $(document).ready(function() {
     $('button.start-simulation').hide();
     $('button.step-simulation').hide();
 
-    field.start(updateField);
+    field.start(updateField, winCallback, maxCyclesCallback, suicideCallback, dieCallback);
   });
 
   $('button.start-simulation-no-visuals').click(function(e) {

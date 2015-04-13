@@ -41,6 +41,10 @@ var Field = function(coreSize, maxCycles) {
 
   this.touched = [];
   this.updateCallback = null;
+  this.winCallback = null;
+  this.maxCyclesCallback = null;
+  this.suicideCallback = null;
+  this.warriorDiedCallback = null;
 
   // Trampoline to keep the stack flat
   this.trampoline = function(fn) {
@@ -192,7 +196,7 @@ var Field = function(coreSize, maxCycles) {
 
     switch(op) {
       case "dat": {
-        console.log("DAT executed at", pc);
+        // Player dies
       } break;
 
       case "mov": {
@@ -364,8 +368,13 @@ Field.prototype.addWarrior = function(warrior) {
 /**
  * Triggers the start of the simulation by executing the first move.
  */
-Field.prototype.start = function(updateCallback) {
+Field.prototype.start = function(updateCallback, winCallback, maxCyclesCallback, suicideCallback, warriorDiedCallback) {
   this.updateCallback = updateCallback;
+  this.winCallback = winCallback;
+  this.maxCyclesCallback = maxCyclesCallback;
+  this.suicideCallback = suicideCallback;
+  this.warriorDiedCallback = warriorDiedCallback;
+
   this.warriorsLeft = this.warriors.length;
   this.currentWarrior = this.warriors[0];
 
@@ -390,7 +399,8 @@ Field.prototype.move = function() {
 
   return function() {
     if(that.currentCycle == that.maxCycles) {
-      console.log("max cycles reached");
+      if(that.maxCyclesCallback) that.maxCyclesCallback(that.maxCycles);
+
       return;
     }
 
@@ -401,15 +411,26 @@ Field.prototype.move = function() {
 
     if(!that.currentWarrior.isAlive()) {
       that.warriorsLeft -= 1;
-      console.log("Warrior died:", that.currentWarrior);
+
+      if(that.warriorDiedCallback) that.warriorDiedCallback(that.currentWarrior, that.currentCycle, pc);
     }
 
+    // Single warrior suicided
     if(that.warriorsLeft === 0) {
-      console.log("Single warrior died");
+      if(that.suicideCallback) that.suicideCallback(that.currentWarrior, that.currentCycle);
+
       return;
     }
-    else if (that.warriorsLeft == 1 && that.warriors.length > 1) {
-      console.log("Only one warrior is left, he is the winner");
+    // Last warrior alive
+    else if(that.warriorsLeft === 1 && that.warriors.length > 1) {
+      if(that.winCallback) {
+        for(var i = 0; i < that.warriors.length; i++) {
+          if(that.warriors[i].isAlive()) {
+            that.winCallback(that.warriors[i], that.currentCycle);
+          }
+        }
+      }
+
       return;
     }
 
