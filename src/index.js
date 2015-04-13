@@ -2,7 +2,7 @@ var Field = require('./field');
 var Parser = require('./parser');
 
 $(document).ready(function() {
-  var field = new Field(8000, 20000);
+  var field = new Field(8000, 80000);
   var colors = ['red', 'blue', 'green', 'orange'];
 
   var debug = false;
@@ -20,7 +20,11 @@ $(document).ready(function() {
   };
 
   var maxCyclesCallback = function(cycle) {
-    console.log("Max cycle reached", cycle);
+    $(".game-end")
+      .removeClass("hidden")
+      .html('<div class="message"><h3>Max cycles reached</h3><h4>Simulation ended after ' + cycle + ' cycles without a winner.</h4></div>');
+
+    $(".controls").hide();
   };
 
   var dieCallback = function(warrior, cycle, pc) {
